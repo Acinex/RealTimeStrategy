@@ -16,6 +16,9 @@
 #include "Libraries/RTSEconomyLibrary.h"
 #include "UI/RTSMinimapVolume.h"
 #include "Vision/RTSFogOfWarActor.h"
+#include "Vision/RTSVisionInfo.h"
+#include "Vision/RTSVisionState.h"
+#include "Vision/RTSVisionVolume.h"
 
 
 URTSMinimapWidget::URTSMinimapWidget(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
@@ -236,17 +239,18 @@ void URTSMinimapWidget::DrawUnits(FPaintContext& InContext) const
 		{
 			if (OwnerComponent->GetPlayerOwner() == PlayerState)
 			{
-				FSlateBrush UnitSlateBrush = OwnUnitsBrush;
-				if (bUsePlayerColors)
-				{
-					UnitSlateBrush.TintColor = PlayerState->GetColor();
-				}
 
 				// Check if the unit has been taking damage lately.
 				const URTSHealthComponent* HealthComponent = Actor->FindComponentByClass<URTSHealthComponent>();
 				const float RealTimeSeconds = Actor->GetWorld()->GetRealTimeSeconds();
 
 				const URTSCombatComponent* CombatComponent = Actor->FindComponentByClass<URTSCombatComponent>();
+
+				FSlateBrush UnitSlateBrush = OwnUnitsBrush;
+				if (bUsePlayerColors)
+				{
+					UnitSlateBrush.TintColor = PlayerState->GetColor();
+				}
 
 				const float LastTimeDamageTaken = IsValid(CombatComponent) ? CombatComponent->GetLastTimeDamageTaken() : IsValid(HealthComponent) ? HealthComponent->GetLastTimeDamageTaken() : 0.0F;
 
