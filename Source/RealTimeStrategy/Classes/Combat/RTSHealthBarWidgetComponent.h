@@ -8,6 +8,7 @@
 
 
 class URTSHealthComponent;
+class URTSCombatComponent;
 
 
 /**
@@ -25,11 +26,12 @@ public:
     UFUNCTION(BlueprintImplementableEvent, Category = "RTS")
     void UpdateHealthBar(float HealthPercentage);
 
-
 private:
-    UPROPERTY()
-    URTSHealthComponent* HealthComponent;
+	UPROPERTY()
+	URTSCombatComponent* CombatComponent;
+	UPROPERTY()
+	URTSHealthComponent* HealthComponent;
 
-    UFUNCTION()
-    void OnHealthChanged(AActor* Actor, float OldHealth, float NewHealth, AActor* DamageCauser);
+	UFUNCTION()
+	virtual void OnHealthChanged(AActor* Actor, float OldHealth, float NewHealth, AActor* DamageCauser);
 };

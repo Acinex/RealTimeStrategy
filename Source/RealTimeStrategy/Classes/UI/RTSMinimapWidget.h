@@ -77,6 +77,13 @@ private:
 	UPROPERTY(EditAnywhere, Category = "RTS|Units")
 	FSlateBrush NeutralUnitsBrush;
 
+	/** Brush for drawing neutral units on the minimap. */
+	UPROPERTY(EditAnywhere, Category = "RTS|Units")
+	FSlateBrush ResourcesBrush;
+	/** Brush for drawing neutral units on the minimap. */
+	UPROPERTY(EditAnywhere, Category = "RTS|Units")
+	bool bOverrideResourceColor = true;
+
 	/** Brush for drawing blinking damaged units on the minimap. */
 	UPROPERTY(EditAnywhere, Category = "RTS|Units")
 	FSlateBrush DamagedUnitsBlinkBrush;
@@ -96,6 +103,10 @@ private:
 	/** Whether to show the current camera frustum on the minimap. */
 	UPROPERTY(EditAnywhere, Category = "RTS|Camera")
 	bool bDrawViewFrustum = true;
+
+	/** Whether to show the current camera frustum on the minimap. */
+	UPROPERTY(EditAnywhere, Category = "RTS|Camera")
+	FLinearColor ViewFrustumTint = FLinearColor::White;
 
 	/** How long to have a unit change its color on the minimap after it has taken damage. */
 	UPROPERTY(EditAnywhere, Category = "RTS|Units")

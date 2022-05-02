@@ -25,6 +25,7 @@ void ARTSPawnAIController::OnPossess(APawn* InPawn)
 	Super::OnPossess(InPawn);
 
 	AttackComponent = InPawn->FindComponentByClass<URTSAttackComponent>();
+	CombatComponent = InPawn->FindComponentByClass<URTSCombatComponent>();
 
 	// Make AI use assigned blackboard.
 	UBlackboardComponent* BlackboardComponent;
@@ -41,7 +42,7 @@ void ARTSPawnAIController::OnPossess(APawn* InPawn)
 
 void ARTSPawnAIController::FindTargetInAcquisitionRadius()
 {
-	if (!IsValid(AttackComponent))
+	if (!IsValid(AttackComponent) && !IsValid(CombatComponent))
 	{
 		return;
 	}
@@ -52,7 +53,8 @@ void ARTSPawnAIController::FindTargetInAcquisitionRadius()
 
 	TArray<AActor*> NearbyActors;
 	UKismetSystemLibrary::SphereOverlapActors(this, GetPawn()->GetActorLocation(),
-	                                          AttackComponent->GetAcquisitionRadius(), AcquisitionObjectTypes, APawn::StaticClass(), ActorsToIgnore,
+	                                          IsValid(CombatComponent) ? CombatComponent->GetAcquisitionRadius() : AttackComponent->GetAcquisitionRadius(),
+	                                          AcquisitionObjectTypes, APawn::StaticClass(), ActorsToIgnore,
 	                                          NearbyActors);
 
 	// Find target to acquire.
@@ -215,7 +217,7 @@ bool ARTSPawnAIController::InsertContinueGathersOrder()
 	}
 
 	FRTSOrderData Order;
-	Order.OrderClass  = URTSGatherOrder::StaticClass();
+	Order.OrderClass = URTSGatherOrder::StaticClass();
 	Order.TargetActor = ResourceSource;
 	InsertOrder(Order);
 

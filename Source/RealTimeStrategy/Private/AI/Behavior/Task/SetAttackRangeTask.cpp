@@ -5,6 +5,7 @@
 #include "RTSLog.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Combat/RTSAttackComponent.h"
+#include "Combat/RTSCombatComponent.h"
 #include "GameFramework/Controller.h"
 
 USetAttackRangeTask::USetAttackRangeTask(const FObjectInitializer& ObjectInitializer): Super(ObjectInitializer)
@@ -26,13 +27,21 @@ EBTNodeResult::Type USetAttackRangeTask::ExecuteTask(UBehaviorTreeComponent& Own
 		return EBTNodeResult::Failed;
 	}
 
-	const URTSAttackComponent* AttackComponent = Controller->GetPawn()->FindComponentByClass<URTSAttackComponent>();
-	if (!IsValid(AttackComponent))
+	const URTSCombatComponent* CombatComponent = Pawn->FindComponentByClass<URTSCombatComponent>();
+	if (!IsValid(CombatComponent))
 	{
-		return EBTNodeResult::Failed;
+		const URTSAttackComponent* AttackComponent = Controller->GetPawn()->FindComponentByClass<URTSAttackComponent>();
+
+		if (!IsValid(AttackComponent) || AttackComponent->GetAttacks().Num() == 0)
+		{
+			return EBTNodeResult::Failed;
+		}
+		/* TODO: Get suitable range per actor */
+		AttackComponent->GetAttacks()[0].Range;
+		return EBTNodeResult::Succeeded;
 	}
 
-	const float Range = AttackComponent->GetAttacks()[0].Range;
+	const float Range = CombatComponent->GetAttackRange(Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(TargetKey.SelectedKeyName)));
 
 	OwnerComp.GetBlackboardComponent()->SetValueAsFloat(GetSelectedBlackboardKey(), Range);
 

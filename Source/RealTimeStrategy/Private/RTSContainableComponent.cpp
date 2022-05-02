@@ -5,6 +5,7 @@
 
 #include "RTSContainerComponent.h"
 #include "RTSLog.h"
+#include "Combat/RTSCombatComponent.h"
 #include "Combat/RTSHealthComponent.h"
 
 
@@ -32,14 +33,22 @@ void URTSContainableComponent::BeginPlay()
 		return;
 	}
 
-    URTSHealthComponent* HealthComponent = Owner->FindComponentByClass<URTSHealthComponent>();
+	URTSCombatComponent* CombatComponent =  Owner->FindComponentByClass<URTSCombatComponent>();
 
-	if (!IsValid(HealthComponent))
+	if(IsValid(CombatComponent))
 	{
-		return;
-	}
+		CombatComponent->OnKilled.AddDynamic(this, &URTSContainableComponent::OnKilled);
+	} else
+	{
+		URTSHealthComponent* HealthComponent = Owner->FindComponentByClass<URTSHealthComponent>();
 
-	HealthComponent->OnKilled.AddDynamic(this, &URTSContainableComponent::OnKilled);
+		if (!IsValid(HealthComponent))
+		{
+			return;
+		}
+
+		HealthComponent->OnKilled.AddDynamic(this, &URTSContainableComponent::OnKilled);
+	}
 }
 
 AActor* URTSContainableComponent::GetContainer() const

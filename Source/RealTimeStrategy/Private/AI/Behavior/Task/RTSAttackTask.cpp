@@ -2,8 +2,10 @@
 
 #include "AI/Behavior/Task/RTSAttackTask.h"
 
+#include "RTSLog.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Combat/RTSAttackComponent.h"
+#include "Combat/RTSCombatComponent.h"
 #include "GameFramework/Controller.h"
 
 URTSAttackTask::URTSAttackTask(const FObjectInitializer& ObjectInitializer): Super(ObjectInitializer)
@@ -19,16 +21,24 @@ EBTNodeResult::Type URTSAttackTask::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 		return EBTNodeResult::Failed;
 	}
 
+	URTSCombatComponent* CombatComponent = Controller->GetPawn()->FindComponentByClass<URTSCombatComponent>();
 	URTSAttackComponent* AttackComponent = Controller->GetPawn()->FindComponentByClass<URTSAttackComponent>();
 
 	AActor* Target = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(GetSelectedBlackboardKey()));
-
-	if (!IsValid(AttackComponent) || !IsValid(Target))
+	
+	if (!IsValid(CombatComponent) && !IsValid(AttackComponent)  || !IsValid(Target) )
 	{
 		return EBTNodeResult::Failed;
 	}
 
-	AttackComponent->UseAttack(0, Target);
+	if (IsValid(CombatComponent))
+	{
+		CombatComponent->UseAttack(0, Target);
+	}
+	else
+	{
+		AttackComponent->UseAttack(0, Target);
+	}
 
 	return EBTNodeResult::Succeeded;
 }

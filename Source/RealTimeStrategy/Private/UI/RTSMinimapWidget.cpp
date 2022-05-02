@@ -10,12 +10,12 @@
 #include "RTSOwnerComponent.h"
 #include "RTSPlayerController.h"
 #include "RTSPlayerState.h"
+#include "Combat/RTSCombatComponent.h"
 #include "Combat/RTSHealthComponent.h"
+#include "Economy/RTSResourceSourceComponent.h"
+#include "Libraries/RTSEconomyLibrary.h"
 #include "UI/RTSMinimapVolume.h"
 #include "Vision/RTSFogOfWarActor.h"
-#include "Vision/RTSVisionInfo.h"
-#include "Vision/RTSVisionState.h"
-#include "Vision/RTSVisionVolume.h"
 
 
 URTSMinimapWidget::URTSMinimapWidget(const FObjectInitializer& ObjectInitializer /*= FObjectInitializer::Get()*/)
@@ -236,19 +236,21 @@ void URTSMinimapWidget::DrawUnits(FPaintContext& InContext) const
 		{
 			if (OwnerComponent->GetPlayerOwner() == PlayerState)
 			{
-				// Check if the unit has been taking damage lately.
-				URTSHealthComponent* HealthComponent = Actor->FindComponentByClass<URTSHealthComponent>();
-				float RealTimeSeconds = Actor->GetWorld()->GetRealTimeSeconds();
-
 				FSlateBrush UnitSlateBrush = OwnUnitsBrush;
 				if (bUsePlayerColors)
 				{
 					UnitSlateBrush.TintColor = PlayerState->GetColor();
 				}
 
-				if (!IsValid(HealthComponent) ||
-					HealthComponent->GetLastTimeDamageTaken() <= 0.0f ||
-					HealthComponent->GetLastTimeDamageTaken() + DamagedUnitBlinkTimeSeconds < RealTimeSeconds)
+				// Check if the unit has been taking damage lately.
+				const URTSHealthComponent* HealthComponent = Actor->FindComponentByClass<URTSHealthComponent>();
+				const float RealTimeSeconds = Actor->GetWorld()->GetRealTimeSeconds();
+
+				const URTSCombatComponent* CombatComponent = Actor->FindComponentByClass<URTSCombatComponent>();
+
+				const float LastTimeDamageTaken = IsValid(CombatComponent) ? CombatComponent->GetLastTimeDamageTaken() : IsValid(HealthComponent) ? HealthComponent->GetLastTimeDamageTaken() : 0.0F;
+
+				if (LastTimeDamageTaken <= 0.0f || LastTimeDamageTaken + DamagedUnitBlinkTimeSeconds < RealTimeSeconds)
 				{
 					DrawBoxWithBrush(InContext, ActorLocationMinimap, UnitSlateBrush);
 				}
@@ -267,18 +269,30 @@ void URTSMinimapWidget::DrawUnits(FPaintContext& InContext) const
 			}
 			else if (OwnerComponent->GetPlayerOwner() != nullptr && !OwnerComponent->IsSameTeamAsController(Player))
 			{
-				
 				FSlateBrush UnitSlateBrush = EnemyUnitsBrush;
 				if (bUsePlayerColors)
 				{
 					UnitSlateBrush.TintColor = OwnerComponent->GetPlayerOwner()->GetColor();
 				}
-				
+
 				DrawBoxWithBrush(InContext, ActorLocationMinimap, UnitSlateBrush);
 			}
 			else
 			{
-				DrawBoxWithBrush(InContext, ActorLocationMinimap, NeutralUnitsBrush);
+				if (const URTSResourceSourceComponent* ResourceSourceComponent = Actor->FindComponentByClass<URTSResourceSourceComponent>())
+				{
+					FSlateBrush ResourceBrush = ResourcesBrush;
+					if (bOverrideResourceColor)
+					{
+						ResourceBrush.TintColor = URTSEconomyLibrary::GetResourceColor(ResourceSourceComponent->GetResourceType());
+					}
+
+					DrawBoxWithBrush(InContext, ActorLocationMinimap, ResourceBrush);
+				}
+				else
+				{
+					DrawBoxWithBrush(InContext, ActorLocationMinimap, NeutralUnitsBrush);
+				}
 			}
 		}
 
@@ -362,7 +376,9 @@ void URTSMinimapWidget::DrawViewFrustum(FPaintContext& InContext) const
 		InContext.OutDrawElements,
 		InContext.MaxLayer,
 		InContext.AllottedGeometry.ToPaintGeometry(),
-		Points);
+		Points,
+		ESlateDrawEffect::None,
+		ViewFrustumTint);
 }
 
 void URTSMinimapWidget::DrawBoxWithBrush(FPaintContext& InContext, const FVector2D& Position, const FSlateBrush& Brush) const

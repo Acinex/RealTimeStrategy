@@ -30,7 +30,8 @@ namespace UnrealBuildTool.Rules
 					"Landscape",
 					"GameplayTags",
 					"GameplayTasks",
-					"NavigationSystem"
+					"NavigationSystem",
+					"GameplayAbilities"
 				});
 
 			// Setup Gameplay Debugger.

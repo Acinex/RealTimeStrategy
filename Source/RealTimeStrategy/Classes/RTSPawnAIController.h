@@ -8,6 +8,7 @@
 #include "Orders/RTSOrder.h"
 #include "Orders/RTSOrderData.h"
 #include "RTSOrderType.h"
+#include "Combat/RTSCombatComponent.h"
 
 #include "RTSPawnAIController.generated.h"
 
@@ -136,6 +137,8 @@ private:
 	
     UPROPERTY()
 	URTSAttackComponent* AttackComponent;
+    UPROPERTY()
+	URTSCombatComponent* CombatComponent;
 
 	ERTSOrderType OrderClassToType(UClass* OrderClass) const;
 };

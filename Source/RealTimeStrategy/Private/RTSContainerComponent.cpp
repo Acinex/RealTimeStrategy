@@ -4,6 +4,7 @@
 
 #include "RTSContainableComponent.h"
 #include "RTSLog.h"
+#include "Combat/RTSCombatComponent.h"
 #include "Combat/RTSHealthComponent.h"
 #include "Vision/RTSVisibleComponent.h"
 
@@ -25,15 +26,23 @@ void URTSContainerComponent::BeginPlay()
 	{
 		return;
 	}
+	
+	URTSCombatComponent* CombatComponent =  Owner->FindComponentByClass<URTSCombatComponent>();
 
-    URTSHealthComponent* HealthComponent = Owner->FindComponentByClass<URTSHealthComponent>();
-
-	if (HealthComponent == nullptr)
+	if(IsValid(CombatComponent))
 	{
-		return;
-	}
+		CombatComponent->OnKilled.AddDynamic(this, &URTSContainerComponent::OnKilled);
+	} else
+	{
+		URTSHealthComponent* HealthComponent = Owner->FindComponentByClass<URTSHealthComponent>();
 
-	HealthComponent->OnKilled.AddDynamic(this, &URTSContainerComponent::OnKilled);
+		if (!IsValid(HealthComponent))
+		{
+			return;
+		}
+
+		HealthComponent->OnKilled.AddDynamic(this, &URTSContainerComponent::OnKilled);
+	}
 }
 
 bool URTSContainerComponent::ContainsActor(const AActor* Actor) const
