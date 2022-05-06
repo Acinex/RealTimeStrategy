@@ -31,6 +31,11 @@ EBTNodeResult::Type URTSGatherResourcesTask::ExecuteTask(UBehaviorTreeComponent&
 		return EBTNodeResult::Failed;
 	}
 
+	if (GathererComponent->IsCapacityFull())
+	{
+		return EBTNodeResult::Failed;
+	}
+
 	AActor* Actor = Cast<AActor>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(BlackboardKey.SelectedKeyName));
 
 	GathererComponent->StartGatheringResources(Actor);
