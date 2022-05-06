@@ -3,6 +3,8 @@
 #include "RTSLog.h"
 #include "RTSPlayerAdvantageComponent.h"
 #include "RTSPlayerState.h"
+#include "RTSRegenerateHealthTask.h"
+#include "Combat/Abilities/RTSGEHealthRegen.h"
 #include "Kismet/GameplayStatics.h"
 #include "Libraries/RTSGameplayLibrary.h"
 #include "Libraries/RTSGameplayTagLibrary.h"
@@ -34,10 +36,14 @@ void URTSCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	const UAbilitySystemComponent* AbilitySystemComponent = GetOwner()->FindComponentByClass<UAbilitySystemComponent>();
-	AttributeSet = Cast<URTSAttributeSet>(AbilitySystemComponent->GetAttributeSet(URTSAttributeSet::StaticClass()));
+	AttributeSet = Cast<URTSAttributeSet>(GetAttributeSet(URTSAttributeSet::StaticClass()));
 
-	if (GetOwner()->GetLocalRole() != ROLE_Authority)
+	if (!IsValid(AttributeSet))
+	{
+		UE_LOG(LogRTS, Error, TEXT("No RTSAttributeSet provided"))
+	}
+
+	if (!GetOwner()->HasAuthority())
 	{
 		return;
 	}
@@ -52,12 +58,48 @@ void URTSCombatComponent::BeginPlay()
 
 		AbilitySpecs.Emplace(GiveAbility(Ability));
 	}
+
+	if (bRegenerateHealth)
+	{
+		URTSRegenerateHealthTask* RegenerateHealthTask = URTSRegenerateHealthTask::NewTask<URTSRegenerateHealthTask>(this);
+		RegenerateHealthTask->ReadyForActivation();
+	}
 }
 
 void URTSCombatComponent::AddGameplayTags(FGameplayTagContainer& InOutTagContainer)
 {
 	InOutTagContainer.AddTag(URTSGameplayTagLibrary::Status_Changing_Alive());
 	InOutTagContainer.AddTag(URTSGameplayTagLibrary::Status_Permanent_CanAttack());
+}
+
+float URTSCombatComponent::GetMaximumHealth() const
+{
+	if (!IsValid(AttributeSet))
+	{
+		return 0.0F;
+	}
+
+	return AttributeSet->GetMaxHealth();
+}
+
+float URTSCombatComponent::GetCurrentHealth() const
+{
+	if (!IsValid(AttributeSet))
+	{
+		return 0.0F;
+	}
+
+	return AttributeSet->GetHealth();
+}
+
+float URTSCombatComponent::GetHealthRegenerationRate() const
+{
+	return HealthRegenerationRate;
+}
+
+void URTSCombatComponent::SetHealthRegenerationRate(float Rate)
+{
+	HealthRegenerationRate = Rate;
 }
 
 void URTSCombatComponent::KillActor(AActor* DamageCauser) const

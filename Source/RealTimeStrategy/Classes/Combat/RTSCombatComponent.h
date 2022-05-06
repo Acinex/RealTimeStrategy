@@ -13,6 +13,7 @@
 class AActor;
 class USoundCue;
 class ARTSAbilityProjectile;
+class URTSRegenerateHealthTask;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FRTSCombatComponentKilledSignature, AActor*, Actor, AController*, PreviousOwner, AActor*, DamageCauser);
 
@@ -60,11 +61,16 @@ public:
 
 	/** Gets the maximum health of the actor. */
 	UFUNCTION(BlueprintPure)
-	float GetMaximumHealth() const { return AttributeSet->GetMaxHealth(); }
+	float GetMaximumHealth() const;
 
 	/** Gets the current health of the actor. */
 	UFUNCTION(BlueprintPure)
-	float GetCurrentHealth() const { return AttributeSet->GetHealth(); }
+	float GetCurrentHealth() const;
+
+	UFUNCTION(BlueprintPure)
+	float GetHealthRegenerationRate() const;
+
+	void SetHealthRegenerationRate(float Rate);
 
 	UFUNCTION(BlueprintPure)
 	const URTSAttributeSet* GetRTSAttributeSet() const { return AttributeSet; }
@@ -128,6 +134,5 @@ protected:
 	UPROPERTY()
 	TArray<FGameplayAbilitySpecHandle> AbilitySpecs;
 
-	UPROPERTY()
 	float LastTimeDamageTaken;
 };
