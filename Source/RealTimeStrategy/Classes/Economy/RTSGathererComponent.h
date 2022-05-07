@@ -95,7 +95,7 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "RTS")
 	FRTSGathererComponentResourcesReturnedSignature OnResourcesReturned;
 
-private:
+protected:
 	/** Resources that can be gathered by the actor. */
 	UPROPERTY(EditDefaultsOnly, Category = "RTS")
 	TArray<FRTSGatherData> GatheredResources;
@@ -103,10 +103,12 @@ private:
 	/** Types of actors the gatherer can gather resources from. */
 	UPROPERTY(EditDefaultsOnly, Category = "RTS")
 	TArray<TSubclassOf<AActor>> ResourceSourceActorClasses;
-
+	
 	/** Radius in which the actor will automatically gather resources from, in cm. */
 	UPROPERTY(EditDefaultsOnly, Category = "RTS", meta = (ClampMin = 0))
 	float ResourceSweepRadius;
+
+private:
 
 	/** Amount of resources the actor is carrying. */
 	UPROPERTY(Replicated)
