@@ -34,7 +34,7 @@ void ARTSGameMode::BeginPlay()
 	Super::BeginPlay();
 
 	// Parse options.
-    FString NumAIPlayersString = UGameplayStatics::ParseOption(OptionsString, TEXT("NumAIPlayers"));
+	FString NumAIPlayersString = UGameplayStatics::ParseOption(OptionsString, TEXT("NumAIPlayers"));
 
 	if (!NumAIPlayersString.IsEmpty())
 	{
@@ -46,7 +46,7 @@ void ARTSGameMode::BeginPlay()
 	// Spawn AI players.
 	for (int32 Index = 0; Index < NumAIPlayers; ++Index)
 	{
-        ARTSPlayerAIController* NewAI = StartAIPlayer();
+		ARTSPlayerAIController* NewAI = StartAIPlayer();
 
 		if (NewAI != nullptr)
 		{
@@ -145,7 +145,7 @@ void ARTSGameMode::RestartPlayerAtPlayerStart(AController* NewPlayer, AActor* St
 		return;
 	}
 
-    ARTSGameState* RTSGameState = GetGameState<ARTSGameState>();
+	ARTSGameState* RTSGameState = GetGameState<ARTSGameState>();
 
 	if (!IsValid(RTSGameState))
 	{
@@ -212,6 +212,7 @@ void ARTSGameMode::RestartPlayerAtPlayerStart(AController* NewPlayer, AActor* St
 	{
 		const uint8 PlayerIndex = GetAvailablePlayerIndex();
 		PlayerState->SetPlayerIndex(PlayerIndex);
+		PlayerState->SetColor(GetPlayerColor(PlayerIndex));
 
 		for (TActorIterator<AActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 		{
@@ -249,6 +250,31 @@ ARTSPlayerAIController* ARTSGameMode::StartAIPlayer()
 
 	RestartPlayer(NewAI);
 	return NewAI;
+}
+
+FLinearColor ARTSGameMode::GetPlayerColor(const uint8 Index)
+{
+	if (!PlayerColors.IsValidIndex(Index))
+	{
+		return FLinearColor::Black;
+	}
+
+	return PlayerColors[Index];
+}
+
+void ARTSGameMode::SetPlayerColors(const TArray<FLinearColor> Colors)
+{
+	PlayerColors = Colors;
+
+	for (const ARTSTeamInfo* Team : Teams)
+	{
+		TArray<AController*> Controllers = Team->GetTeamMembers();
+		for (const AController* Controller : Controllers)
+		{
+			ARTSPlayerState* PlayerState = Controller->GetPlayerState<ARTSPlayerState>();
+			PlayerState->SetColor(GetPlayerColor(PlayerState->GetPlayerIndex()));
+		}
+	}
 }
 
 AActor* ARTSGameMode::SpawnActorForPlayer(TSubclassOf<AActor> ActorClass, AController* ActorOwner, const FTransform& SpawnTransform)

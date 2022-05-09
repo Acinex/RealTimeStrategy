@@ -38,6 +38,12 @@ public:
 
 	virtual ARTSPlayerAIController* StartAIPlayer();
 
+	UFUNCTION(BlueprintPure)
+	FLinearColor GetPlayerColor(uint8 Index);
+
+	UFUNCTION(BlueprintCallable)
+	void SetPlayerColors(TArray<FLinearColor> Colors);
+
 	/** Spawns an actor of the specified type and transfers ownership to the specified player. */
 	virtual AActor* SpawnActorForPlayer(TSubclassOf<AActor> ActorClass, AController* ActorOwner, const FTransform& SpawnTransform);
 
@@ -57,6 +63,10 @@ public:
 	/** Event when a player has been defeated. */
 	UFUNCTION(BlueprintImplementableEvent, Category = "RTS", meta = (DisplayName = "OnPlayerDefeated"))
 	void ReceiveOnPlayerDefeated(AController* Player);
+
+protected:
+	UPROPERTY(EditAnywhere, Category="RTS|Players")
+	TArray<FLinearColor> PlayerColors;
 
 private:
 	/** Class of TeamInfo to spawn. */
