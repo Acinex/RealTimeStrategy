@@ -179,6 +179,10 @@ void ARTSGameMode::RestartPlayerAtPlayerStart(AController* NewPlayer, AActor* St
 
 	ARTSPlayerState* PlayerState = Cast<ARTSPlayerState>(NewPlayer->PlayerState);
 
+	const uint8 PlayerIndex = GetAvailablePlayerIndex();
+	PlayerState->SetPlayerIndex(PlayerIndex);
+	PlayerState->SetColor(GetPlayerColor(PlayerIndex));
+
 	if (URTSRace* Race = PlayerState->GetRace(); IsValid(Race))
 	{
 		// Build spawn info.
@@ -208,23 +212,16 @@ void ARTSGameMode::RestartPlayerAtPlayerStart(AController* NewPlayer, AActor* St
 	}
 
 	// Transfer ownership of pre-placed units.
-	if (IsValid(PlayerState))
+	for (TActorIterator<AActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
-		const uint8 PlayerIndex = GetAvailablePlayerIndex();
-		PlayerState->SetPlayerIndex(PlayerIndex);
-		PlayerState->SetColor(GetPlayerColor(PlayerIndex));
+		AActor* Actor = *ActorItr;
 
-		for (TActorIterator<AActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+		// Check owner.
+		URTSOwnerComponent* OwnerComponent = Actor->FindComponentByClass<URTSOwnerComponent>();
+
+		if (IsValid(OwnerComponent) && OwnerComponent->GetInitialOwnerPlayerIndex() == PlayerIndex)
 		{
-			AActor* Actor = *ActorItr;
-
-			// Check owner.
-			URTSOwnerComponent* OwnerComponent = Actor->FindComponentByClass<URTSOwnerComponent>();
-
-			if (IsValid(OwnerComponent) && OwnerComponent->GetInitialOwnerPlayerIndex() == PlayerIndex)
-			{
-				TransferOwnership(Actor, NewPlayer);
-			}
+			TransferOwnership(Actor, NewPlayer);
 		}
 	}
 }
