@@ -129,6 +129,9 @@ void ARTSBuildingCursor::SetupForBuilding(TSubclassOf<AActor> BuildingClass)
 		// Set grid size.
 		SetGridWidthAndHeight(ConstructionSiteComponent->GetGridWidthAndHeight());
 
+		bCheckCollision = ConstructionSiteComponent->GetCheckCollision();
+		BuildingLocationDetectionChannels = ConstructionSiteComponent->GetBuildingLocationDetectionChannels();
+
 		// Preview attack range.
 		bPreviewAttackRange = ConstructionSiteComponent->ShouldPreviewAttackRange();
 
