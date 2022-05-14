@@ -65,6 +65,11 @@ void URTSGathererComponent::TickComponent(float DeltaTime, enum ELevelTick TickT
 	}
 }
 
+float URTSGathererComponent::GetCarriedResourceAmount() const
+{
+	return CarriedResourceAmount;
+}
+
 bool URTSGathererComponent::CanGatherFrom(AActor* ResourceSource) const
 {
 	if (!IsValid(ResourceSource))
@@ -263,8 +268,12 @@ void URTSGathererComponent::StartGatheringResources(AActor* ResourceSource)
 		return;
 	}
 
-	// Reset carried amount.
-	SetCarriedResourceAmount(0.0f);
+	if (ResourceSourceComponent->GetResourceType() != CarriedResourceType)
+	{
+		// Reset carried amount.
+		SetCarriedResourceAmount(0.0f);
+	}
+
 	CarriedResourceType = ResourceSourceComponent->GetResourceType();
 
 	// Start cooldown before first gathering.
@@ -460,6 +469,8 @@ void URTSGathererComponent::LeaveCurrentResourceSource()
 	{
 		ContainerComponent->UnloadActor(GetOwner());
 	}
+
+	UE_LOG(LogRTS, Log, TEXT("Actor %s has left the ResourceSource"), *GetOwner()->GetActorLabel())
 
 	// Store data about resource source for future reference (e.g. return here, or find similar).
 	PreviousResourceSource = CurrentResourceSource;

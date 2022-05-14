@@ -35,6 +35,8 @@ public:
 
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	UFUNCTION(BlueprintPure)
+	float GetCarriedResourceAmount() const;
 
 	/** Checks whether the actor can gather from the specified source, e.g. is allowed to gather, and is not at capacity limit. */
 	UFUNCTION(BlueprintPure)
@@ -103,13 +105,12 @@ protected:
 	/** Types of actors the gatherer can gather resources from. */
 	UPROPERTY(EditDefaultsOnly, Category = "RTS")
 	TArray<TSubclassOf<AActor>> ResourceSourceActorClasses;
-	
+
 	/** Radius in which the actor will automatically gather resources from, in cm. */
 	UPROPERTY(EditDefaultsOnly, Category = "RTS", meta = (ClampMin = 0))
 	float ResourceSweepRadius;
 
 private:
-
 	/** Amount of resources the actor is carrying. */
 	UPROPERTY(Replicated)
 	float CarriedResourceAmount;
