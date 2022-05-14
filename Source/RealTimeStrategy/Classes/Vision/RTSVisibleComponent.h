@@ -12,6 +12,8 @@
 class AActor;
 class AController;
 
+class URTSVisibleComponent;
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRTSVisibleComponentVisionStageChangedSignature, URTSVisibleComponent*, Component, ERTSVisionState, VisionState);
 
 /** Allows the actor to be hidden by fog of war or other effects. */
 UCLASS(ClassGroup="RTS", Category="RTS", meta=(BlueprintSpawnableComponent))
@@ -23,12 +25,15 @@ public:
 	virtual void BeginPlay() override;
 
 	/** Server. Gets the vision state of the actor for the specified player. */
+	UFUNCTION(BlueprintCallable)
 	ERTSVisionState GetVisionStateForPlayer(AController* Controller) const;
 
 	/** Client. Whether the actor is visible due to vision for the local player. */
+	UFUNCTION(BlueprintPure)
 	bool IsVisibleForLocalClient() const;
 
 	/** Server. Whether the actor is visible due to vision for the specified player. */
+	UFUNCTION(BlueprintCallable)
 	bool IsVisibleForPlayer(AController* Controller) const;
 
 	/** Client. Override the visibility of the actor, forcing it to be visible or hidden because of the specified reason. */
@@ -41,10 +46,14 @@ public:
 	/** Server. Sets the vision state of the actor for the specified player. */
 	void SetVisionStateForPlayer(AController* Controller, ERTSVisionState InVisionState);
 
+	/** Event when the current vision stage was changed. */
+	UPROPERTY(BlueprintAssignable, Category = "RTS")
+	FRTSVisibleComponentVisionStageChangedSignature OnVisionStateChanged;
+
 private:
 	/** Prevent the actor from ever being hidden again after seen once (e.g. buildings). */
 	UPROPERTY(EditDefaultsOnly, Category = "RTS")
-	bool bDontHideAfterSeen;
+	bool bDontHideAfterSeen = false;
 
 	/** Whether the actor and all children are currently visible, or not. */
 	bool bVisible;

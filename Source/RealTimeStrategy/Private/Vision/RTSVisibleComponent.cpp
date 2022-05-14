@@ -84,6 +84,7 @@ void URTSVisibleComponent::SetClientHideReason(const FGameplayTag& HideReason, b
 
 void URTSVisibleComponent::SetClientVisionState(ERTSVisionState InVisionState)
 {
+	const bool bChanged = ClientVisionState != InVisionState;
 	ClientVisionState = InVisionState;
 
 	if (IsVisibleForLocalClient())
@@ -92,6 +93,11 @@ void URTSVisibleComponent::SetClientVisionState(ERTSVisionState InVisionState)
 	}
 
 	UpdateClientHiddenFlag();
+
+	if(bChanged)
+	{
+		OnVisionStateChanged.Broadcast(this, InVisionState);
+	}
 }
 
 void URTSVisibleComponent::SetVisionStateForPlayer(AController* Controller, ERTSVisionState InVisionState)
