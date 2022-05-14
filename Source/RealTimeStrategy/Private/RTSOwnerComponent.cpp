@@ -5,6 +5,7 @@
 #include "Net/UnrealNetwork.h"
 
 #include "RTSPlayerState.h"
+#include "RTSSettings.h"
 #include "RTSTeamInfo.h"
 
 
@@ -50,6 +51,33 @@ void URTSOwnerComponent::SetPlayerStateOwner(ARTSPlayerState* PlayerState)
 	if (PlayerOwner != PreviousOwner)
 	{
 		NotifyOnOwnerChanged(PreviousOwner, PlayerOwner);
+
+		const URTSSettings* Settings = URTSSettings::Get();
+
+		if (!IsValid(Settings) || Settings->UnitColorMaterialParameterName.IsNone())
+		{
+			return;
+		}
+
+		TArray<UMeshComponent*> ActorComponents;
+		GetOwner()->GetComponents<UMeshComponent>(ActorComponents);
+
+		for (UMeshComponent* MeshComponent : ActorComponents)
+		{
+			uint8 Index = 0;
+			for (UMaterialInterface* Material : MeshComponent->GetMaterials())
+			{
+				UMaterialInstanceDynamic* Instance;
+				if (!IsValid(Instance = Cast<UMaterialInstanceDynamic>(Material)))
+				{
+					Instance = MeshComponent->CreateDynamicMaterialInstance(Index, Material);
+				}
+
+				Instance->SetVectorParameterValue(Settings->UnitColorMaterialParameterName, PlayerOwner->GetColor());
+
+				Index++;
+			}
+		}
 	}
 }
 
@@ -119,7 +147,6 @@ void URTSOwnerComponent::NotifyOnOwnerChanged(ARTSPlayerState* PreviousOwner, AR
 			if (IsValid(PlayerState) && (PlayerState == PreviousOwner || PlayerState == NewOwner))
 			{
 				PlayerState->NotifyOnActorOwnerChanged(GetOwner(), PreviousOwner, NewOwner);
-				continue;
 			}
 		}
 	}

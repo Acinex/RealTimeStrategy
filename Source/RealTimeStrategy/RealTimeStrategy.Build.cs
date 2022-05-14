@@ -9,13 +9,13 @@ namespace UnrealBuildTool.Rules
 			bEnforceIWYU = true;
 
 			PrivateIncludePaths.AddRange(
-				new []
+				new[]
 				{
 					"RealTimeStrategy/Private"
 				});
 
 			PublicDependencyModuleNames.AddRange(
-				new []
+				new[]
 				{
 					"Core",
 					"CoreUObject",
@@ -31,7 +31,8 @@ namespace UnrealBuildTool.Rules
 					"GameplayTags",
 					"GameplayTasks",
 					"NavigationSystem",
-					"GameplayAbilities"
+					"GameplayAbilities",
+					"DeveloperSettings"
 				});
 
 			// Setup Gameplay Debugger.
