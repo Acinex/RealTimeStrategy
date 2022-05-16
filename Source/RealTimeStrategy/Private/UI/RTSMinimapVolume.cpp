@@ -1,5 +1,6 @@
 #include "UI/RTSMinimapVolume.h"
 
+#include "Components/BrushComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Engine/Texture2D.h"
@@ -23,6 +24,8 @@ ARTSMinimapVolume::ARTSMinimapVolume(const FObjectInitializer& ObjectInitializer
 	CaptureComponent2D->bCaptureEveryFrame = false;
 
 	HiddenActorClasses.Add(APawn::StaticClass());
+
+	GetBrushComponent()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
 }
 
 #if WITH_EDITOR

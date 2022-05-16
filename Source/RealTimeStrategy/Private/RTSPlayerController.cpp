@@ -513,13 +513,13 @@ bool ARTSPlayerController::TraceObjects(const FVector& WorldOrigin, const FVecto
 		return false;
 	}
 
-	const FCollisionObjectQueryParams Params(FCollisionObjectQueryParams::InitType::AllObjects);
+	const FCollisionQueryParams Params;
 
-	return World->LineTraceMultiByObjectType(
+	return World->LineTraceMultiByChannel(
 		OutHitResults,
 		WorldOrigin,
 		WorldOrigin + WorldDirection * HitResultTraceDistance,
-		Params);
+		ECC_Visibility, Params);
 }
 
 bool ARTSPlayerController::IsSelectableActor(AActor* Actor) const
@@ -1953,6 +1953,7 @@ void ARTSPlayerController::PlayerTick(float DeltaTime)
 			// Update position of building being placed.
 			if (BuildingCursor)
 			{
+				UE_LOG(LogTemp, Log, TEXT("Location: %s (%s)"), *HoveredWorldPosition.ToString(), *HitResult.GetActor()->GetActorLabel())
 				BuildingCursor->SetCursorLocation(HoveredWorldPosition);
 
 				const bool bLocationValid = CanPlaceBuilding(BuildingBeingPlacedClass, HoveredWorldPosition);

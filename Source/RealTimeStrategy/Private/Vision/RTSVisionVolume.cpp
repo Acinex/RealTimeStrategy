@@ -12,6 +12,8 @@ ARTSVisionVolume::ARTSVisionVolume(const FObjectInitializer& ObjectInitializer /
 	SizeInTiles = 256;
 	LevelHeight = 250.0f;
 	HeightLevelTraceChannel = ECC_WorldStatic;
+
+	GetBrushComponent()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
 }
 
 void ARTSVisionVolume::Initialize()
