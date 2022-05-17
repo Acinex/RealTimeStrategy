@@ -8,6 +8,7 @@
 #include "RTSGameMode.generated.h"
 
 
+class URTSOwnerComponent;
 class AController;
 
 class ARTSPlayerAIController;
@@ -26,7 +27,6 @@ class REALTIMESTRATEGY_API ARTSGameMode : public AGameModeBase
 
 public:
 	ARTSGameMode(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
-
 
 	virtual void BeginPlay() override;
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
@@ -91,4 +91,11 @@ private:
 
 	/** Gets the first player index that isn't assigned to any player. */
 	uint8 GetAvailablePlayerIndex();
+
+	UFUNCTION()
+	void OnActorRegistered(UActorComponent* Component);
+
+	/** Will transfer the ownership from every actor which has no owner currently */
+	void CorrectAllDefaultOwnerStates();
+	bool CorrectDefaultOwnerState(URTSOwnerComponent* OwnerComponent);
 };

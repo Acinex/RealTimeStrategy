@@ -3,6 +3,8 @@
 
 #include "RTSComponentRegistry.h"
 
+#include "RTSLog.h"
+
 TSet<AActor*> URTSComponentRegistry::GetAllActors()
 {
 	TSet<AActor*> Actors;
@@ -42,13 +44,14 @@ TSet<TWeakObjectPtr<T>> URTSComponentRegistry::GetComponents()
 
 void URTSComponentRegistry::Register(UActorComponent* Component)
 {
-	bool bSuccess;
-	RegisteredComponents.Add(Component, &bSuccess);
-
-	if (!bSuccess)
+	bool bIsAlreadyInSetPtr;
+	RegisteredComponents.Add(Component, &bIsAlreadyInSetPtr);
+	if (bIsAlreadyInSetPtr)
 	{
 		return;
 	}
+
+	UE_LOG(LogRTS, Warning, TEXT("Register: %s (%s)"), *Component->GetName(), *Component->GetOwner()->GetActorLabel())
 
 	OnActorRegistered.Broadcast(Component);
 }

@@ -53,6 +53,12 @@ void ARTSGameMode::BeginPlay()
 			NewAI->PlayerState->SetPlayerName(FString::Printf(TEXT("AI Player %i"), Index + 1));
 		}
 	}
+
+	URTSComponentRegistry* ComponentRegistry = GetGameInstance()->GetSubsystem<URTSComponentRegistry>();
+
+	CorrectAllDefaultOwnerStates();
+
+	ComponentRegistry->OnActorRegistered.AddDynamic(this, &ARTSGameMode::OnActorRegistered);
 }
 
 void ARTSGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
@@ -208,20 +214,6 @@ void ARTSGameMode::RestartPlayerAtPlayerStart(AController* NewPlayer, AActor* St
 					ConstructionSiteComponent->FinishConstruction();
 				}
 			}
-		}
-	}
-
-	// Transfer ownership of pre-placed units.
-	for (TActorIterator<AActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
-	{
-		AActor* Actor = *ActorItr;
-
-		// Check owner.
-		URTSOwnerComponent* OwnerComponent = Actor->FindComponentByClass<URTSOwnerComponent>();
-
-		if (IsValid(OwnerComponent) && OwnerComponent->GetInitialOwnerPlayerIndex() == PlayerIndex)
-		{
-			TransferOwnership(Actor, NewPlayer);
 		}
 	}
 }
@@ -406,4 +398,50 @@ uint8 ARTSGameMode::GetAvailablePlayerIndex()
 	while (bPlayerIndexInUse && PlayerIndex < ARTSPlayerState::PLAYER_INDEX_NONE);
 
 	return PlayerIndex;
+}
+
+void ARTSGameMode::OnActorRegistered(UActorComponent* Component)
+{
+	CorrectDefaultOwnerState(Cast<URTSOwnerComponent>(Component));
+}
+
+void ARTSGameMode::CorrectAllDefaultOwnerStates()
+{
+	URTSComponentRegistry* ComponentRegistry = GetGameInstance()->GetSubsystem<URTSComponentRegistry>();
+
+	TSet<TWeakObjectPtr<URTSOwnerComponent>> OwnerComponents = ComponentRegistry->GetComponents<URTSOwnerComponent>();
+	for (TSet<TWeakObjectPtr<URTSOwnerComponent>>::TIterator ComponentIterator = OwnerComponents.CreateIterator(); ComponentIterator; ++ComponentIterator)
+	{
+		if(CorrectDefaultOwnerState(ComponentIterator->Get()))
+		{
+			ComponentIterator.RemoveCurrent();
+		}
+	}
+}
+
+bool ARTSGameMode::CorrectDefaultOwnerState(URTSOwnerComponent* OwnerComponent)
+{
+	if (!IsValid(OwnerComponent) || IsValid(OwnerComponent->GetPlayerOwner()) || OwnerComponent->GetInitialOwnerPlayerIndex() == ARTSPlayerState::PLAYER_INDEX_NONE)
+	{
+		return false;
+	}
+
+	for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+	{
+		APlayerController* Controller = Iterator->Get();
+		const ARTSPlayerState* PlayerState = Controller->GetPlayerState<ARTSPlayerState>();
+
+		if (!IsValid(PlayerState))
+		{
+			continue;
+		}
+
+		if (OwnerComponent->GetInitialOwnerPlayerIndex() == PlayerState->GetPlayerIndex())
+		{
+			TransferOwnership(OwnerComponent->GetOwner(), Controller);
+			return true;
+		}
+	}
+
+	return false;
 }
