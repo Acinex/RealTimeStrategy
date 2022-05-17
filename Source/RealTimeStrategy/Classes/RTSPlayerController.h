@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "RTSComponentRegistry.h"
 
 #include "GameFramework/PlayerController.h"
 #include "Templates/SubclassOf.h"
@@ -417,6 +418,9 @@ protected:
 	/** Player state has been created or replicated and is now available. */
 	virtual void OnPlayerStateAvailable(ARTSPlayerState* NewPlayerState);
 
+	UPROPERTY()
+	URTSComponentRegistry* ComponentRegistry;
+
 private:
 	/** Movement speed of the camera when moved with keys or mouse, in cm/sec. */
 	UPROPERTY(EditDefaultsOnly, Category = "RTS|Camera", meta = (ClampMin = 0))
@@ -539,9 +543,6 @@ private:
 
 	/** Traces all relevant objects using the specified ray. */
 	bool TraceObjects(const FVector& WorldOrigin, const FVector& WorldDirection, TArray<FHitResult>& OutHitResults) const;
-
-	/** Checks whether the specified actor is valid and selectable. */
-	bool IsSelectableActor(AActor* Actor) const;
 
 	/** Automatically issues the most reasonable order for the current pointer position. */
 	UFUNCTION()

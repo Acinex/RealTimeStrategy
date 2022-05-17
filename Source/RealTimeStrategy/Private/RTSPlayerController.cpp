@@ -87,6 +87,8 @@ void ARTSPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	ComponentRegistry = UGameplayStatics::GetGameInstance(this)->GetSubsystem<URTSComponentRegistry>();
+
 	// Allow immediate updates for interested listeners.
 	for (int32 Index = 0; Index < PlayerResourcesComponent->GetResourceTypes().Num(); ++Index)
 	{
@@ -485,11 +487,12 @@ bool ARTSPlayerController::GetObjectsInSelectionFrame(TArray<FHitResult>& HitRes
 	// Iterate all actors.
 	HitResults.Reset();
 
-	for (TActorIterator<AActor> ActorIt(GetWorld()); ActorIt; ++ActorIt)
-	{
-		AActor* Actor = *ActorIt;
+	TSet<TWeakObjectPtr<URTSSelectableComponent>> SelectableComponents = ComponentRegistry->GetComponents<URTSSelectableComponent>();
 
+	for (TWeakObjectPtr<URTSSelectableComponent> SelectableComponent : SelectableComponents)
+	{
 		FVector2D ActorScreenPosition;
+		AActor* Actor = SelectableComponent->GetOwner();
 
 		if (UGameplayStatics::ProjectWorldToScreen(this, Actor->GetActorLocation(), ActorScreenPosition))
 		{
@@ -520,25 +523,6 @@ bool ARTSPlayerController::TraceObjects(const FVector& WorldOrigin, const FVecto
 		WorldOrigin,
 		WorldOrigin + WorldDirection * HitResultTraceDistance,
 		ECC_Visibility, Params);
-}
-
-bool ARTSPlayerController::IsSelectableActor(AActor* Actor) const
-{
-	// Check if valid.
-	if (!IsValid(Actor))
-	{
-		return false;
-	}
-
-	// Check if selectable.
-	const auto SelectableComponent = Actor->FindComponentByClass<URTSSelectableComponent>();
-
-	if (!SelectableComponent)
-	{
-		return false;
-	}
-
-	return true;
 }
 
 void ARTSPlayerController::IssueDefaultOrderToSelectedActors()
@@ -1361,10 +1345,6 @@ void ARTSPlayerController::FinishSelectActors()
 	for (auto& HitResult : HitResults)
 	{
 		if (!HitResult.HasValidHitObjectHandle())
-		{
-			continue;
-		}
-		if (!IsSelectableActor(HitResult.GetActor()))
 		{
 			continue;
 		}

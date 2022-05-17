@@ -13,6 +13,7 @@
 #include "Economy/RTSPlayerResourcesComponent.h"
 #include "Economy/RTSResourceSourceComponent.h"
 #include "Economy/RTSResourceDrainComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Libraries/RTSCollisionLibrary.h"
 #include "Libraries/RTSGameplayLibrary.h"
 #include "Orders/RTSBeginConstructionOrder.h"
@@ -30,6 +31,13 @@ ARTSPlayerAIController::ARTSPlayerAIController(const FObjectInitializer& ObjectI
 
 	// Set reasonable default values.
 	MaximumBaseBuildingDistance = 1500.0f;
+}
+
+void ARTSPlayerAIController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	ComponentRegistry = UGameplayStatics::GetGameInstance(this)->GetSubsystem<URTSComponentRegistry>();
 }
 
 TSubclassOf<AActor> ARTSPlayerAIController::GetNextPawnToProduce() const
@@ -71,23 +79,21 @@ TSubclassOf<AActor> ARTSPlayerAIController::GetNextPawnToProduce() const
 
 AActor* ARTSPlayerAIController::GetPrimaryResourceDrain() const
 {
-	APawn* PrimaryResourceDrain = nullptr;
+	TSet<TWeakObjectPtr<URTSResourceDrainComponent>> ResourceDrainComponents = ComponentRegistry->GetComponents<URTSResourceDrainComponent>();
 
-	for (TActorIterator<APawn> PawnItr(GetWorld()); PawnItr; ++PawnItr)
+	for (TWeakObjectPtr<URTSResourceDrainComponent> ResourceDrainComponent : ResourceDrainComponents)
 	{
-		APawn* SomePawn = *PawnItr;
-
-		if (SomePawn->GetOwner() != this)
+		if(!ResourceDrainComponent.IsValid())
 		{
 			continue;
 		}
 
-		if (SomePawn->FindComponentByClass<URTSResourceDrainComponent>() == nullptr)
-		{
-			continue;
-		}
+		AActor* Actor = ResourceDrainComponent->GetOwner();
 
-		return SomePawn;
+		if(Actor->GetOwner() == this)
+		{
+			return Actor;
+		}
 	}
 
 	return nullptr;
@@ -106,24 +112,22 @@ AActor* ARTSPlayerAIController::GetPrimaryResourceSource() const
 	// Sweep for sources.
 	AActor* ClosestResourceSource = nullptr;
 	float ClosestResourceSourceDistance = 0.0f;
-
-	for (TActorIterator<AActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	TSet<TWeakObjectPtr<URTSResourceSourceComponent>> ResourceSourceComponents = ComponentRegistry->GetComponents<URTSResourceSourceComponent>();
+	
+	for (TWeakObjectPtr<URTSResourceSourceComponent> ResourceSourceComponent : ResourceSourceComponents)
 	{
-		const auto ResourceSource = *ActorItr;
-
-		// Check if found resource source.
-		const auto ResourceSourceComponent = ResourceSource->FindComponentByClass<URTSResourceSourceComponent>();
-
-		if (!ResourceSourceComponent)
+		if(!ResourceSourceComponent.IsValid())
 		{
 			continue;
 		}
-
+		
 		// Check resource type.
 		if (ResourceSourceComponent->GetResourceType() != PrimaryResourceType)
 		{
 			continue;
 		}
+
+		AActor* ResourceSource = ResourceSourceComponent->GetOwner();
 
 		// Check distance.
 		const float Distance = PrimaryResourceDrain->GetDistanceTo(ResourceSource);

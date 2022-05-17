@@ -6,6 +6,11 @@
 
 #include "RTSHUD.generated.h"
 
+class URTSProductionProgressBarWidgetComponent;
+class URTSConstructionProgressBarWidgetComponent;
+class URTSHealthBarWidgetComponent;
+class URTSComponentRegistry;
+
 
 /**
 * HUD with RTS features, such as showing a selection frame.
@@ -18,6 +23,8 @@ class REALTIMESTRATEGY_API ARTSHUD : public AHUD
 public:
 	virtual void DrawHUD() override;
 
+	virtual void BeginPlay() override;
+	
 	/** Event for drawaing a floating combat text. */
 	virtual void NotifyDrawFloatingCombatText(
 		AActor* Actor,
@@ -134,6 +141,9 @@ private:
 	/** Actor the player has hovering last frame. */
 	UPROPERTY()
 	AActor* OldHoveredActor;
+	
+	UPROPERTY()
+	URTSComponentRegistry* ComponentRegistry;
 
 
 	/** Draws the current selection frame if mouse is being dragged. */
@@ -143,32 +153,23 @@ private:
 	void DrawFloatingCombatTexts();
 
 	/** Draws unit health bars. */
-	void DrawHealthBars();
+	void DrawHealthBars() const;
 
 	/** Draws the health bar of the specified actor. */
-	void DrawHealthBar(AActor* Actor);
-
-	/** Hides the health bar of the specified actor. */
-	void HideHealthBar(AActor* Actor);
+	void DrawHealthBar(URTSHealthBarWidgetComponent* HealthBarWidgetComponent) const;
 
 	/** Draws all construction progress bars. */
-	void DrawConstructionProgressBars();
+	void DrawConstructionProgressBars() const;
 
 	/** Draws the construction progress bar of the specified actor. */
-	void DrawConstructionProgressBar(AActor* Actor);
-
-	/** Hides the construction progress bar of the specified actor. */
-	void HideConstructionProgressBar(AActor* Actor);
+	void DrawConstructionProgressBar(URTSConstructionProgressBarWidgetComponent* ConstructionProgressBarWidgetComponent) const;
 
 	/** Draws a custom HUD effect for the currently hovered actor (e.g. player name). */
 	void DrawHoveredActorWidget();
 
 	/** Draws all production progress bars. */
-	void DrawProductionProgressBars();
+	void DrawProductionProgressBars() const;
 
 	/** Draws the production progress bar of the specified actor. */
-	void DrawProductionProgressBar(AActor* Actor);
-
-	/** Hides the production progress bar of the specified actor. */
-	void HideProductionProgressBar(AActor* Actor);
+	void DrawProductionProgressBar(URTSProductionProgressBarWidgetComponent* ProductionProgressBarWidgetComponent) const;
 };

@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 
 #include "GameplayTagContainer.h"
-#include "Components/ActorComponent.h"
+#include "RTSSelfRegisteringActorComponent.h"
 #include "Vision/RTSVisionState.h"
 
 #include "RTSVisibleComponent.generated.h"
@@ -17,7 +17,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRTSVisibleComponentVisionStageChan
 
 /** Allows the actor to be hidden by fog of war or other effects. */
 UCLASS(ClassGroup="RTS", Category="RTS", meta=(BlueprintSpawnableComponent))
-class REALTIMESTRATEGY_API URTSVisibleComponent : public UActorComponent
+class REALTIMESTRATEGY_API URTSVisibleComponent : public URTSSelfRegisteringActorComponent
 {
 	GENERATED_BODY()
 

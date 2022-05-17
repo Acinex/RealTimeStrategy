@@ -1,7 +1,9 @@
 #include "RTSSelectableComponent.h"
 
+#include "RTSComponentRegistry.h"
 #include "Components/DecalComponent.h"
 #include "GameFramework/Actor.h"
+#include "Kismet/GameplayStatics.h"
 #include "Libraries/RTSCollisionLibrary.h"
 
 URTSSelectableComponent::URTSSelectableComponent()
@@ -13,6 +15,9 @@ URTSSelectableComponent::URTSSelectableComponent()
 void URTSSelectableComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	ComponentRegistry = UGameplayStatics::GetGameInstance(this)->GetSubsystem<URTSComponentRegistry>();
+	ComponentRegistry->Register(this);
 
 	AActor* Owner = GetOwner();
 
@@ -34,15 +39,22 @@ void URTSSelectableComponent::BeginPlay()
 	SetHiddenInGame(true);
 }
 
+void URTSSelectableComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	ComponentRegistry->Deregister(this);
+}
+
 void URTSSelectableComponent::PostLoad()
 {
 	Super::PostLoad();
-	
+
 	if (!IsValid(SelectionCircleMaterial_DEPRECATED))
 	{
 		return;
 	}
-	
+
 	DecalMaterial = SelectionCircleMaterial_DEPRECATED;
 	SelectionCircleMaterial_DEPRECATED = nullptr;
 }

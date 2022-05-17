@@ -115,23 +115,27 @@ AActor* URTSGathererComponent::FindClosestResourceDrain() const
 	AActor* ClosestResourceDrain = nullptr;
 	float ClosestResourceDrainDistance = 0.0f;
 
-	for (TActorIterator<AActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	const auto Gatherer = GetOwner();
+	// Check owner.
+	const auto GathererOwnerComponent = Gatherer->FindComponentByClass<URTSOwnerComponent>();
+
+	if (!GathererOwnerComponent)
 	{
-		const auto Gatherer = GetOwner();
-		const auto ResourceDrain = *ActorItr;
+		return nullptr;
+	}
 
-		// Check if found resource drain.
-		const auto ResourceDrainComponent = ResourceDrain->FindComponentByClass<URTSResourceDrainComponent>();
+	TSet<TWeakObjectPtr<URTSResourceDrainComponent>> ResourceDrainComponents = ComponentRegistry->GetComponents<URTSResourceDrainComponent>();
 
-		if (!ResourceDrainComponent)
+	for (TWeakObjectPtr<URTSResourceDrainComponent> ResourceDrainComponent : ResourceDrainComponents)
+	{
+		if (!ResourceDrainComponent.IsValid())
 		{
 			continue;
 		}
 
-		// Check owner.
-		const auto GathererOwnerComponent = Gatherer->FindComponentByClass<URTSOwnerComponent>();
+		AActor* ResourceDrain = ResourceDrainComponent->GetOwner();
 
-		if (!GathererOwnerComponent || !GathererOwnerComponent->IsSameTeamAsActor(ResourceDrain))
+		if (!GathererOwnerComponent->IsSameTeamAsActor(ResourceDrain))
 		{
 			continue;
 		}
@@ -177,15 +181,14 @@ AActor* URTSGathererComponent::GetClosestResourceSource(TSubclassOf<class URTSRe
 	AActor* ClosestResourceSource = nullptr;
 	float ClosestResourceSourceDistance = 0.0f;
 
-	for (TActorIterator<AActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	TSet<TWeakObjectPtr<URTSResourceSourceComponent>> ResourceSourceComponents = ComponentRegistry->GetComponents<URTSResourceSourceComponent>();
+
+	const auto Gatherer = GetOwner();
+	
+	for (TWeakObjectPtr<URTSResourceSourceComponent> ResourceSourceComponent : ResourceSourceComponents)
 	{
-		const auto Gatherer = GetOwner();
-		const auto ResourceSource = *ActorItr;
 
-		// Check if found resource source.
-		const auto ResourceSourceComponent = ResourceSource->FindComponentByClass<URTSResourceSourceComponent>();
-
-		if (!ResourceSourceComponent)
+		if (!ResourceSourceComponent.IsValid())
 		{
 			continue;
 		}
@@ -196,6 +199,8 @@ AActor* URTSGathererComponent::GetClosestResourceSource(TSubclassOf<class URTSRe
 			continue;
 		}
 
+		AActor* ResourceSource = ResourceSourceComponent->GetOwner();
+		
 		// Check distance.
 		const float Distance = Gatherer->GetDistanceTo(ResourceSource);
 

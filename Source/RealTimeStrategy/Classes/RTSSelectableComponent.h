@@ -1,8 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
-#include "Components/ActorComponent.h"
+#include "RTSComponentRegistry.h"
 #include "Components/DecalComponent.h"
 
 #include "RTSSelectableComponent.generated.h"
@@ -34,6 +33,7 @@ public:
 	URTSSelectableComponent();
 
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	virtual void PostLoad() override;
 
@@ -109,4 +109,7 @@ private:
 	/** Material instance for rendering the selection circle of the actor. */
 	UPROPERTY()
 	UMaterialInstanceDynamic* SelectionCircleMaterialInstance;
+
+	UPROPERTY()
+	URTSComponentRegistry* ComponentRegistry;
 };

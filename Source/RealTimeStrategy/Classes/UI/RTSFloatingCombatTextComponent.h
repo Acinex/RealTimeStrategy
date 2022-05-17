@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 
-#include "Components/ActorComponent.h"
+#include "RTSSelfRegisteringActorComponent.h"
 
 #include "UI/RTSFloatingCombatTextData.h"
 
@@ -13,7 +13,7 @@
 * Stores floating texts to be displayed above the actor.
 */
 UCLASS(Category="RTS", meta = (BlueprintSpawnableComponent))
-class REALTIMESTRATEGY_API URTSFloatingCombatTextComponent : public UActorComponent
+class REALTIMESTRATEGY_API URTSFloatingCombatTextComponent : public URTSSelfRegisteringActorComponent
 {
 	GENERATED_BODY()
 

@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 
 #include "AIController.h"
+#include "RTSComponentRegistry.h"
 #include "Templates/SubclassOf.h"
 
 #include "Economy/RTSResourceType.h"
@@ -28,6 +29,7 @@ class REALTIMESTRATEGY_API ARTSPlayerAIController : public AAIController
 public:
 	ARTSPlayerAIController(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	virtual void BeginPlay() override;
 
 	/** Checks the build order and returns the class of the next pawn to produce, or the Pawn class if nothing needs to be produced. */
 	UFUNCTION(BlueprintPure)
@@ -59,6 +61,8 @@ public:
 protected:
 	virtual void OnPossess(APawn* InPawn) override;
 
+	UPROPERTY()
+	URTSComponentRegistry* ComponentRegistry;
 
 private:
 	/** Behavior tree to use for driving the player AI. */

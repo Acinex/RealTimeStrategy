@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 
-#include "Components/ActorComponent.h"
+#include "RTSSelfRegisteringActorComponent.h"
 #include "RTSGameplayTagsProvider.h"
 
 #include "GameplayTagContainer.h"
@@ -12,7 +12,7 @@
 
 /** Base class for actor components with additional functionality, e.g. initial gameplay tags. */
 UCLASS(ClassGroup="RTS", Category="RTS", meta = (BlueprintSpawnableComponent))
-class REALTIMESTRATEGY_API URTSActorComponent : public UActorComponent, public IRTSGameplayTagsProvider
+class REALTIMESTRATEGY_API URTSActorComponent : public URTSSelfRegisteringActorComponent, public IRTSGameplayTagsProvider
 {
 	GENERATED_BODY()
 

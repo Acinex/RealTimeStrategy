@@ -16,6 +16,7 @@
 #include "Combat/RTSCombatComponent.h"
 #include "Construction/RTSConstructionSiteComponent.h"
 #include "Economy/RTSGathererComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Vision/RTSVisibleComponent.h"
 
 
@@ -187,14 +188,19 @@ bool URTSGameplayLibrary::GetMissingRequirementFor(UObject* WorldContextObject, 
 	// Check if owning player owns all required actors.
 	TArray<TSubclassOf<AActor>> RequiredActors = RequirementsComponent->GetRequiredActors();
 
-	for (TActorIterator<AActor> ActorItr(WorldContextObject->GetWorld()); ActorItr; ++ActorItr)
-	{
-		const AActor* SomeActor = *ActorItr;
-		const URTSOwnerComponent* OtherOwnerComponent = SomeActor->FindComponentByClass<URTSOwnerComponent>();
+	URTSComponentRegistry* ComponentRegistry = UGameplayStatics::GetGameInstance(WorldContextObject)->GetSubsystem<URTSComponentRegistry>();
+	TSet<TWeakObjectPtr<URTSOwnerComponent>> OtherOwnerComponents = ComponentRegistry->GetComponents<URTSOwnerComponent>();
 
-		if (OtherOwnerComponent && OtherOwnerComponent->GetPlayerOwner() == OwnerComponent->GetPlayerOwner() && IsReadyToUse(SomeActor))
+	for (TWeakObjectPtr<URTSOwnerComponent> OtherOwnerComponent : OtherOwnerComponents)
+	{
+		if (!OtherOwnerComponent.IsValid())
 		{
-			RequiredActors.Remove(SomeActor->GetClass());
+			continue;
+		}
+
+		if (OtherOwnerComponent->GetPlayerOwner() == OwnerComponent->GetPlayerOwner() && IsReadyToUse(OtherOwnerComponent->GetOwner()))
+		{
+			RequiredActors.Remove(OtherOwnerComponent->GetOwner()->GetClass());
 
 			if (RequiredActors.Num() == 0)
 			{

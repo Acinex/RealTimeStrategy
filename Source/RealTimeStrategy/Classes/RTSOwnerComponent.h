@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 
-#include "Components/ActorComponent.h"
+#include "RTSSelfRegisteringActorComponent.h"
 
 #include "RTSOwnerComponent.generated.h"
 
@@ -19,7 +19,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRTSOwnerComponentOwnerChangedSigna
 * Specifies the owning player of the actor.
 */
 UCLASS(ClassGroup="RTS", Category="RTS", meta = (BlueprintSpawnableComponent))
-class REALTIMESTRATEGY_API URTSOwnerComponent : public UActorComponent
+class REALTIMESTRATEGY_API URTSOwnerComponent : public URTSSelfRegisteringActorComponent
 {
 	GENERATED_BODY()
 

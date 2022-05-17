@@ -8,6 +8,7 @@
 #include "RTSOwnerComponent.h"
 #include "RTSPlayerController.h"
 #include "RTSTeamInfo.h"
+#include "Kismet/GameplayStatics.h"
 
 
 const uint8 ARTSPlayerState::PLAYER_INDEX_NONE = 255;
@@ -79,20 +80,15 @@ void ARTSPlayerState::DiscoverOwnActors()
 {
 	OwnActors.Empty();
 
-	for (TActorIterator<AActor> ActorIt(GetWorld()); ActorIt; ++ActorIt)
+	URTSComponentRegistry* ComponentRegistry = UGameplayStatics::GetGameInstance(this)->GetSubsystem<URTSComponentRegistry>();
+
+	TSet<TWeakObjectPtr<URTSOwnerComponent>> OwnerComponents = ComponentRegistry->GetComponents<URTSOwnerComponent>();
+
+	for (TWeakObjectPtr<URTSOwnerComponent> OwnerComponent : OwnerComponents)
 	{
-		AActor* Actor = *ActorIt;
-
-		if (!IsValid(Actor))
+		if (OwnerComponent.IsValid() && OwnerComponent->GetPlayerOwner() == this)
 		{
-			continue;
-		}
-
-		const URTSOwnerComponent* OwnerComponent = Actor->FindComponentByClass<URTSOwnerComponent>();
-
-		if (IsValid(OwnerComponent) && OwnerComponent->GetPlayerOwner() == this)
-		{
-			OwnActors.AddUnique(Actor);
+			OwnActors.AddUnique(OwnerComponent->GetOwner());
 		}
 	}
 }
