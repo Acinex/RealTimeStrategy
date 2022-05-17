@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 
 #include "Components/ActorComponent.h"
+#include "Components/DecalComponent.h"
 
 #include "RTSSelectableComponent.generated.h"
 
@@ -25,14 +26,16 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRTSSelectableComponentUnhoveredSign
  * Allows selecting the actor, e.g. by left-click.
  */
 UCLASS(ClassGroup="RTS", Category="RTS", meta=(BlueprintSpawnableComponent))
-class REALTIMESTRATEGY_API URTSSelectableComponent : public UActorComponent
+class REALTIMESTRATEGY_API URTSSelectableComponent : public UDecalComponent
 {
 	GENERATED_BODY()
 
 public:
-	virtual void BeginPlay() override;
-	virtual void DestroyComponent(bool bPromoteChildren = false) override;
+	URTSSelectableComponent();
 
+	virtual void BeginPlay() override;
+
+	virtual void PostLoad() override;
 
 	/** Selects the unit for the local player. */
 	UFUNCTION(BlueprintCallable)
@@ -79,6 +82,10 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "RTS")
 	FRTSSelectableComponentUnhoveredSignature OnUnhovered;
 
+protected:
+	/** Defines if the Decal should be sized by the collision */
+	UPROPERTY(EditDefaultsOnly, Category="RTS")
+	bool bOverrideDecalSize = false;
 
 private:
 	/** Sort index for selected units. */
@@ -86,8 +93,8 @@ private:
 	int32 SelectionPriority;
 
 	/** Material for rendering the selection circle of the actor. */
-	UPROPERTY(EditDefaultsOnly, Category = "RTS")
-	UMaterialInterface* SelectionCircleMaterial;
+	UPROPERTY()
+	UMaterialInterface* SelectionCircleMaterial_DEPRECATED;
 
 	/** Sound to play when the actor is selected. */
 	UPROPERTY(EditDefaultsOnly, Category = "RTS")
@@ -98,10 +105,6 @@ private:
 
 	/** Whether the unit is currently hovered by the local player, or not. */
 	bool bHovered;
-
-	/** Decal used for rendering the selection circle of the actor. */
-	UPROPERTY()
-	UDecalComponent* DecalComponent;
 
 	/** Material instance for rendering the selection circle of the actor. */
 	UPROPERTY()

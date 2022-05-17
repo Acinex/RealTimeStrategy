@@ -1,13 +1,14 @@
 #include "RTSSelectableComponent.h"
 
-#include "WorldCollision.h"
 #include "Components/DecalComponent.h"
 #include "GameFramework/Actor.h"
 #include "Libraries/RTSCollisionLibrary.h"
-#include "Materials/MaterialInstanceDynamic.h"
 
-#include "RTSLog.h"
-
+URTSSelectableComponent::URTSSelectableComponent()
+{
+	// Rotate decal to face ground.
+	SetRelativeRotation(FRotator::MakeFromEuler(FVector(0.0f, -90.0f, 0.0f)));
+}
 
 void URTSSelectableComponent::BeginPlay()
 {
@@ -20,41 +21,30 @@ void URTSSelectableComponent::BeginPlay()
 		return;
 	}
 
-	// Calculate decal size.
-	const float DecalHeight = URTSCollisionLibrary::GetActorCollisionHeight(Owner);
-	const float DecalRadius = URTSCollisionLibrary::GetActorCollisionSize(Owner);
+	if (bOverrideDecalSize)
+	{
+		// Calculate decal size.
+		const float DecalHeight = URTSCollisionLibrary::GetActorCollisionHeight(Owner);
+		const float DecalRadius = URTSCollisionLibrary::GetActorCollisionSize(Owner);
 
-	// Create selection circle decal.
-	DecalComponent = NewObject<UDecalComponent>(Owner, TEXT("SelectionCircleDecal"));
+		DecalSize = FVector(DecalHeight, DecalRadius, DecalRadius);
+	}
 
-	if (!DecalComponent)
+	SelectionCircleMaterialInstance = CreateDynamicMaterialInstance();
+	SetHiddenInGame(true);
+}
+
+void URTSSelectableComponent::PostLoad()
+{
+	Super::PostLoad();
+	
+	if (!IsValid(SelectionCircleMaterial_DEPRECATED))
 	{
 		return;
 	}
-
-	// Set decal size.
-	DecalComponent->RegisterComponent();
-	DecalComponent->AttachToComponent(Owner->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
-	DecalComponent->DecalSize = FVector(DecalHeight, DecalRadius, DecalRadius);
-
-	// Rotate decal to face ground.
-	DecalComponent->SetRelativeRotation(FRotator::MakeFromEuler(FVector(0.0f, -90.0f, 0.0f)));
-
-	// Setup decal material.
-	SelectionCircleMaterialInstance = UMaterialInstanceDynamic::Create(SelectionCircleMaterial, this);
-	DecalComponent->SetDecalMaterial(SelectionCircleMaterialInstance);
-
-	DecalComponent->SetHiddenInGame(true);
-}
-
-void URTSSelectableComponent::DestroyComponent(bool bPromoteChildren /*= false*/)
-{
-	Super::DestroyComponent(bPromoteChildren);
-
-	if (IsValid(DecalComponent))
-	{
-		DecalComponent->DestroyComponent();
-	}
+	
+	DecalMaterial = SelectionCircleMaterial_DEPRECATED;
+	SelectionCircleMaterial_DEPRECATED = nullptr;
 }
 
 void URTSSelectableComponent::SelectActor()
@@ -67,10 +57,7 @@ void URTSSelectableComponent::SelectActor()
 	bSelected = true;
 
 	// Update selection circle.
-	if (IsValid(DecalComponent))
-	{
-		DecalComponent->SetHiddenInGame(false);
-	}
+	SetHiddenInGame(false);
 
 	// Notify listeners.
 	OnSelected.Broadcast(GetOwner());
@@ -86,10 +73,7 @@ void URTSSelectableComponent::DeselectActor()
 	bSelected = false;
 
 	// Update selection circles.
-	if (IsValid(DecalComponent))
-	{
-		DecalComponent->SetHiddenInGame(true);
-	}
+	SetHiddenInGame(true);
 
 	// Notify listeners.
 	OnDeselected.Broadcast(GetOwner());
