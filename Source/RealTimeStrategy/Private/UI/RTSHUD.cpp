@@ -130,7 +130,7 @@ void ARTSHUD::DrawFloatingCombatTexts()
 		{
 			continue;
 		}
-		
+
 		for (FRTSFloatingCombatTextData& TextData : FloatingCombatTextComponent->GetTexts())
 		{
 			// Calculate lifetime.
@@ -177,13 +177,13 @@ void ARTSHUD::DrawHealthBars() const
 
 	for (TWeakObjectPtr<URTSHealthBarWidgetComponent> HealthBarWidgetComponent : HealthBarWidgetComponents)
 	{
-		if(!HealthBarWidgetComponent.IsValid())
+		if (!HealthBarWidgetComponent.IsValid())
 		{
 			continue;
 		}
 
 		AActor* Actor = HealthBarWidgetComponent->GetOwner();
-		
+
 		if (!URTSGameplayLibrary::IsFullyVisibleForLocalClient(Actor))
 		{
 			HealthBarWidgetComponent->SetVisibility(false);
@@ -234,12 +234,12 @@ void ARTSHUD::DrawConstructionProgressBars() const
 	{
 		return;
 	}
-	
+
 	TSet<TWeakObjectPtr<URTSConstructionProgressBarWidgetComponent>> ConstructionProgressBarWidgetComponents = ComponentRegistry->GetComponents<URTSConstructionProgressBarWidgetComponent>();
 
 	for (TWeakObjectPtr<URTSConstructionProgressBarWidgetComponent> ConstructionProgressBarWidgetComponent : ConstructionProgressBarWidgetComponents)
 	{
-		if(!ConstructionProgressBarWidgetComponent.IsValid())
+		if (!ConstructionProgressBarWidgetComponent.IsValid())
 		{
 			continue;
 		}
@@ -287,6 +287,7 @@ void ARTSHUD::DrawConstructionProgressBar(URTSConstructionProgressBarWidgetCompo
 
 	if (!ConstructionSiteComponent->IsConstructing())
 	{
+		ConstructionProgressBarWidgetComponent->SetVisibility(false);
 		return;
 	}
 
@@ -349,12 +350,12 @@ void ARTSHUD::DrawProductionProgressBars() const
 	{
 		return;
 	}
-	
+
 	TSet<TWeakObjectPtr<URTSProductionProgressBarWidgetComponent>> ProductionProgressBarWidgetComponents = ComponentRegistry->GetComponents<URTSProductionProgressBarWidgetComponent>();
-	
+
 	for (TWeakObjectPtr<URTSProductionProgressBarWidgetComponent> ProductionProgressBarWidgetComponent : ProductionProgressBarWidgetComponents)
 	{
-		if(!ProductionProgressBarWidgetComponent.IsValid())
+		if (!ProductionProgressBarWidgetComponent.IsValid())
 		{
 			continue;
 		}
@@ -402,8 +403,11 @@ void ARTSHUD::DrawProductionProgressBar(URTSProductionProgressBarWidgetComponent
 
 	if (!ProductionComponent->IsProducing())
 	{
+		ProductionProgressBarWidgetComponent->SetVisibility(false);
 		return;
 	}
+
+	UE_LOG(LogTemp, Log, TEXT("Actor %s is still producing"), *ProductionProgressBarWidgetComponent->GetOwner()->GetActorLabel())
 
 	// Draw progress bar.
 	const FVector2D Size = GetActorSizeOnScreen(ProductionProgressBarWidgetComponent->GetOwner());
