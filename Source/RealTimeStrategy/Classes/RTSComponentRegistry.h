@@ -19,7 +19,7 @@ public:
 	UFUNCTION(BlueprintPure)
 	TSet<AActor*> GetAllActors();
 
-	TSet<TWeakObjectPtr<UActorComponent>> GetAllComponents();
+	TArray<TWeakObjectPtr<UActorComponent>> GetAllComponents();
 
 	template <class T>
 	TSet<TWeakObjectPtr<T>> GetComponents();
@@ -31,6 +31,5 @@ public:
 	FRTSActorRegistryComponentRegisterSignature OnActorUnRegistered;
 
 private:
-	UPROPERTY()
-	TSet<TWeakObjectPtr<UActorComponent>> RegisteredComponents;
+	TMultiMap<UClass*,TWeakObjectPtr<UActorComponent>> RegisteredComponents;
 };

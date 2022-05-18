@@ -9,7 +9,7 @@ TSet<AActor*> URTSComponentRegistry::GetAllActors()
 {
 	TSet<AActor*> Actors;
 
-	for (TWeakObjectPtr<UActorComponent> RegisteredComponent : RegisteredComponents)
+	for (TWeakObjectPtr<UActorComponent> RegisteredComponent : GetAllComponents())
 	{
 		if (RegisteredComponent.IsValid())
 		{
@@ -20,9 +20,11 @@ TSet<AActor*> URTSComponentRegistry::GetAllActors()
 	return Actors;
 }
 
-TSet<TWeakObjectPtr<UActorComponent>> URTSComponentRegistry::GetAllComponents()
+TArray<TWeakObjectPtr<UActorComponent>> URTSComponentRegistry::GetAllComponents()
 {
-	return RegisteredComponents;
+	TArray<TWeakObjectPtr<UActorComponent>> Components;
+	RegisteredComponents.GenerateValueArray(Components);
+	return Components;
 }
 
 template <class T>
@@ -30,12 +32,15 @@ TSet<TWeakObjectPtr<T>> URTSComponentRegistry::GetComponents()
 {
 	static_assert(TPointerIsConvertibleFromTo<T, const UActorComponent>::Value, "'T' template parameter to GetComponents must be derived from UActorComponent");
 
+	TArray<TWeakObjectPtr<UActorComponent>> Components;
+	RegisteredComponents.MultiFind(T::StaticClass(), Components);
+
 	TSet<TWeakObjectPtr<T>> Result;
-	for (const TWeakObjectPtr<UActorComponent>& Component : RegisteredComponents)
+	for (const TWeakObjectPtr<UActorComponent>& Component : Components)
 	{
-		if (Component.IsValid() && Component->GetClass()->IsChildOf(T::StaticClass()))
+		if (Component.IsValid())
 		{
-			Result.Emplace(Cast<T>(Component));
+			Result.Emplace(Cast<T>(Component.Get()));
 		}
 	}
 
@@ -44,20 +49,15 @@ TSet<TWeakObjectPtr<T>> URTSComponentRegistry::GetComponents()
 
 void URTSComponentRegistry::Register(UActorComponent* Component)
 {
-	bool bIsAlreadyInSetPtr;
-	RegisteredComponents.Add(Component, &bIsAlreadyInSetPtr);
-	if (bIsAlreadyInSetPtr)
-	{
-		return;
-	}
+	RegisteredComponents.Add(Component->GetClass(), Component);
 
-	UE_LOG(LogRTS, Warning, TEXT("Register: %s (%s)"), *Component->GetName(), *Component->GetOwner()->GetActorLabel())
+	UE_LOG(LogRTS, Log, TEXT("Register: %s (%s)"), *Component->GetName(), *Component->GetOwner()->GetActorLabel())
 
 	OnActorRegistered.Broadcast(Component);
 }
 
 void URTSComponentRegistry::Deregister(UActorComponent* Component)
 {
-	RegisteredComponents.Remove(Component);
+	RegisteredComponents.Remove(Component->GetClass(), Component);
 	OnActorUnRegistered.Broadcast(Component);
 }
