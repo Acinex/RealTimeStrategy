@@ -45,11 +45,7 @@ public:
 
 	/** Gets the attack-range for the provided actor as a target. */
 	UFUNCTION(BlueprintPure)
-	virtual float GetAttackRange(AActor* Target) const
-	{
-		/* TODO concept for a per actor range check. Maybe based on damage-type or flying/grounded */
-		return Attacks[0].Range;
-	}
+	virtual float GetAttackRange(AActor* Target) const;
 
 	/** Gets the attacks available for the actor. Different attacks might be used at different ranges, or against different types of targets. */
 	UFUNCTION(BlueprintPure)

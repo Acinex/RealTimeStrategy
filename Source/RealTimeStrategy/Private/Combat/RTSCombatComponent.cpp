@@ -32,6 +32,16 @@ void URTSCombatComponent::UseAttack(int32 AttackIndex, AActor* Target)
 	}
 }
 
+float URTSCombatComponent::GetAttackRange(AActor* Target) const
+{
+	/* TODO concept for a per actor range check. Maybe based on damage-type or flying/grounded */
+	if (!Attacks.Num())
+	{
+		return 0;
+	}
+	return Attacks[0].Range;
+}
+
 void URTSCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
