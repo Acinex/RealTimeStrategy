@@ -8,7 +8,10 @@
 #include "RTSOwnerComponent.h"
 #include "Economy/RTSGathererComponent.h"
 #include "Combat/RTSAttackComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Libraries/RTSConstructionLibrary.h"
+#include "Libraries/RTSFunctionLibrary.h"
+#include "Libraries/RTSGameplayLibrary.h"
 #include "Libraries/RTSGameplayTagLibrary.h"
 #include "Libraries/RTSOrderLibrary.h"
 #include "Orders/RTSAttackOrder.h"
@@ -57,17 +60,17 @@ void ARTSPawnAIController::FindTargetInAcquisitionRadius()
 	                                          AcquisitionObjectTypes, APawn::StaticClass(), ActorsToIgnore,
 	                                          NearbyActors);
 
+	const AActor* MyActor = GetPawn();
+
 	// Find target to acquire.
 	for (AActor* NearbyActor : NearbyActors)
 	{
-		if (!IsValid(NearbyActor))
+		if (!URTSGameplayLibrary::IsVisibleForActor(MyActor, NearbyActor))
 		{
 			continue;
 		}
 
 		// Check owner.
-		const AActor* MyActor = GetPawn();
-
 		if (IsValid(MyActor))
 		{
 			const URTSOwnerComponent* MyOwnerComponent = MyActor->FindComponentByClass<URTSOwnerComponent>();
