@@ -1,9 +1,6 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+﻿#include "RaceUnitData.h"
 
-
-#include "RTSRace.h"
-
-TArray<TSubclassOf<AActor>> URTSRace::GetBuildOrder() const
+TArray<TSubclassOf<AActor>> FRaceUnitData::GetBuildOrder() const
 {
 	TArray<TSubclassOf<AActor>> Classes;
 

@@ -1,6 +1,7 @@
 #include "RTSPlayerAIController.h"
 
 #include "EngineUtils.h"
+#include "RTSGameMode.h"
 #include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/Pawn.h"
@@ -61,9 +62,13 @@ TSubclassOf<AActor> ARTSPlayerAIController::GetNextPawnToProduce() const
 
 	// TODO(np): Also count actors already in construction.
 
+	ARTSGameMode* GameMode = Cast<ARTSGameMode>(UGameplayStatics::GetGameMode(this));
+
+	const FRaceUnitData UnitData = GameMode->GetRaceUnitData(RTSPlayerState->GetRace());
+
 	// Check build order.
 	TMap<TSubclassOf<AActor>, int32> BuildOrderPawns;
-	for (TSubclassOf<AActor> PawnClass : RTSPlayerState->GetRace()->GetBuildOrder())
+	for (TSubclassOf<AActor> PawnClass : UnitData.GetBuildOrder())
 	{
 		int32& NumRequiredPawns = BuildOrderPawns.FindOrAdd(PawnClass);
 		++NumRequiredPawns;

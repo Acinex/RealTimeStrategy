@@ -191,17 +191,19 @@ void ARTSGameMode::RestartPlayerAtPlayerStart(AController* NewPlayer, AActor* St
 
 	if (URTSRace* Race = PlayerState->GetRace(); IsValid(Race))
 	{
+		const FRaceUnitData UnitData = GetRaceUnitData(Race);
+
 		// Build spawn info.
-		for (int32 Index = 0; Index < Race->InitialActors.Num(); ++Index)
+		for (int32 Index = 0; Index < UnitData.InitialActors.Num(); ++Index)
 		{
-			const TSubclassOf<AActor> ActorClass = Race->InitialActors[Index];
+			const TSubclassOf<AActor> ActorClass = UnitData.InitialActors[Index];
 
 			// Spawn actor.
 			FVector SpawnLocation = StartSpot->GetActorLocation();
 
-			if (Index < Race->InitialActorLocations.Num())
+			if (Index < UnitData.InitialActorLocations.Num())
 			{
-				SpawnLocation += ActorRotation.RotateVector(Race->InitialActorLocations[Index]);
+				SpawnLocation += ActorRotation.RotateVector(UnitData.InitialActorLocations[Index]);
 			}
 
 			FTransform SpawnTransform = FTransform(SpawnRotation, SpawnLocation);
@@ -340,9 +342,12 @@ void ARTSGameMode::NotifyOnActorKilled(AActor* Actor, AController* ActorOwner)
 		return;
 	}
 
-	const URTSRace* Race = PlayerState->GetRace();
+	URTSRace* Race = PlayerState->GetRace();
 
-	if (!IsValid(Race) || Race->DefeatConditionActorClasses.Num() <= 0)
+
+	const FRaceUnitData Data = GetRaceUnitData(Race);
+
+	if (!IsValid(Race) || Data.DefeatConditionActorClasses.Num() <= 0)
 	{
 		return;
 	}
@@ -350,7 +355,7 @@ void ARTSGameMode::NotifyOnActorKilled(AActor* Actor, AController* ActorOwner)
 	// Check if any required actors are still alive.
 	for (const AActor* OwnedActor : ActorOwner->Children)
 	{
-		if (Race->DefeatConditionActorClasses.Contains(OwnedActor->GetClass()))
+		if (Data.DefeatConditionActorClasses.Contains(OwnedActor->GetClass()))
 		{
 			return;
 		}
@@ -365,6 +370,16 @@ void ARTSGameMode::NotifyOnActorKilled(AActor* Actor, AController* ActorOwner)
 void ARTSGameMode::NotifyOnPlayerDefeated(AController* Player)
 {
 	ReceiveOnPlayerDefeated(Player);
+}
+
+FRaceUnitData ARTSGameMode::GetRaceUnitData(URTSRace* Race)
+{
+	if (FRaceUnitData* UnitData = RaceUnitData.Find(Race))
+	{
+		return *UnitData;
+	}
+
+	return Race->DefaultRaceUnitData;
 }
 
 uint8 ARTSGameMode::GetAvailablePlayerIndex()
@@ -412,7 +427,7 @@ void ARTSGameMode::CorrectAllDefaultOwnerStates()
 	TSet<TWeakObjectPtr<URTSOwnerComponent>> OwnerComponents = ComponentRegistry->GetComponents<URTSOwnerComponent>();
 	for (TSet<TWeakObjectPtr<URTSOwnerComponent>>::TIterator ComponentIterator = OwnerComponents.CreateIterator(); ComponentIterator; ++ComponentIterator)
 	{
-		if(CorrectDefaultOwnerState(ComponentIterator->Get()))
+		if (CorrectDefaultOwnerState(ComponentIterator->Get()))
 		{
 			ComponentIterator.RemoveCurrent();
 		}

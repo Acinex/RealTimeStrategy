@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "RTSRace.h"
 
 #include "GameFramework/GameModeBase.h"
 #include "Templates/SubclassOf.h"
@@ -64,9 +65,15 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "RTS", meta = (DisplayName = "OnPlayerDefeated"))
 	void ReceiveOnPlayerDefeated(AController* Player);
 
+	UFUNCTION(BlueprintCallable, Category = "RTS")
+	FRaceUnitData GetRaceUnitData(URTSRace* Race);
+
 protected:
 	UPROPERTY(EditAnywhere, Category="RTS|Players")
 	TArray<FLinearColor> PlayerColors;
+
+	UPROPERTY(EditDefaultsOnly, Category="RTS|Races")
+	TMap<URTSRace*, FRaceUnitData> RaceUnitData;
 
 private:
 	/** Class of TeamInfo to spawn. */
