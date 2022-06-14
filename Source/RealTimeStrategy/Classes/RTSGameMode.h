@@ -77,19 +77,19 @@ protected:
 
 private:
 	/** Class of TeamInfo to spawn. */
-	UPROPERTY(EditDefaultsOnly, Category = "Team")
+	UPROPERTY(EditDefaultsOnly, Category = "RTS|Team")
 	TSubclassOf<ARTSTeamInfo> TeamClass;
 
 	/** Number of teams to create. */
-	UPROPERTY(EditDefaultsOnly, Category = "Team", meta = (ClampMin = 0))
+	UPROPERTY(EditDefaultsOnly, Category = "RTS|Team", meta = (ClampMin = 0))
 	uint8 NumTeams;
 
 	/** AIController class to spawn for AI players. */
-	UPROPERTY(EditDefaultsOnly, Category = AI)
+	UPROPERTY(EditDefaultsOnly, Category = "RTS|AI")
 	TSubclassOf<ARTSPlayerAIController> PlayerAIControllerClass;
 
 	/** Number of AI players to spawn. */
-	UPROPERTY(EditDefaultsOnly, Category = AI)
+	UPROPERTY(EditDefaultsOnly, Category = "RTS|AI")
 	int32 NumAIPlayers;
 
 	/** Teams of the current match. */
