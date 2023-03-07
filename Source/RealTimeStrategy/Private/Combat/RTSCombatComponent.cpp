@@ -127,19 +127,6 @@ void URTSCombatComponent::KillActor(AActor* DamageCauser) const
 	// Notify listeners.
 	OnKilled.Broadcast(Owner, OwningPlayer, DamageCauser);
 
-	// Stop or destroy actor.
-	switch (ActorDeathType)
-	{
-	case ERTSActorDeathType::DEATH_StopGameplay:
-		URTSGameplayLibrary::StopGameplayFor(Owner);
-		break;
-
-	case ERTSActorDeathType::DEATH_Destroy:
-		Owner->Destroy();
-		break;
-	default: ;
-	}
-
 	OwningPlayer->GetPlayerState<ARTSPlayerState>()->Remove(Owner);
 
 	if (IsValid(DeathSound))
@@ -152,6 +139,19 @@ void URTSCombatComponent::KillActor(AActor* DamageCauser) const
 	if (ARTSGameMode* GameMode = Cast<ARTSGameMode>(UGameplayStatics::GetGameMode(GetWorld())); GameMode != nullptr)
 	{
 		GameMode->NotifyOnActorKilled(Owner, OwningPlayer);
+	}
+
+	// Stop or destroy actor.
+	switch (ActorDeathType)
+	{
+	case ERTSActorDeathType::DEATH_StopGameplay:
+		URTSGameplayLibrary::StopGameplayFor(Owner);
+		break;
+
+	case ERTSActorDeathType::DEATH_Destroy:
+		Owner->Destroy();
+		break;
+	default: ;
 	}
 }
 
