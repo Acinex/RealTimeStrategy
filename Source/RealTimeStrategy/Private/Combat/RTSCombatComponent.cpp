@@ -160,7 +160,10 @@ void URTSCombatComponent::NotifyOnHealthChanged(AActor* Actor, float OldHealth, 
 	// Notify listeners.
 	OnHealthChanged.Broadcast(Actor, OldHealth, NewHealth, DamageCauser);
 
-	LastTimeDamageTaken = GetWorld()->GetRealTimeSeconds();
+	if(NewHealth < OldHealth)
+	{
+		LastTimeDamageTaken = GetWorld()->GetRealTimeSeconds();
+	}
 
 	// Play sound.
 	if (NewHealth <= 0.0f)
