@@ -2,6 +2,8 @@
 
 #include "EngineUtils.h"
 #include "Landscape.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Camera/CameraComponent.h"
 #include "Components/BrushComponent.h"
 #include "Components/InputComponent.h"
@@ -22,6 +24,7 @@
 #include "RTSPlayerAdvantageComponent.h"
 #include "RTSPlayerState.h"
 #include "RTSSelectableComponent.h"
+#include "RTSSettings.h"
 #include "RTSTeamInfo.h"
 #include "Combat/RTSAttackComponent.h"
 #include "Construction/RTSBuilderComponent.h"
@@ -358,6 +361,19 @@ bool ARTSPlayerController::IssueOrderToSelectedActors(const FRTSOrderData& Order
 		bSuccess = true;
 	}
 
+	if (bSuccess)
+	{
+		UNiagaraSystem** Particles = OrderParticles.Find(Order.OrderClass);
+		if (Particles && *Particles)
+		{
+			UNiagaraComponent* SpawnSystemAtLocation = UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, *Particles, Order.TargetLocation);
+			if(!URTSSettings::Get()->OrderParticleMaterialParameterName.IsNone())
+			{
+				SpawnSystemAtLocation->SetColorParameter(URTSSettings::Get()->OrderParticleMaterialParameterName, GetPlayerState()->GetColor());
+			}
+		}
+	}
+
 	return bSuccess;
 }
 
@@ -418,7 +434,7 @@ bool ARTSPlayerController::ServerIssueOrder_Validate(APawn* OrderedPawn, const F
 	return OrderedPawn->GetOwner() == this;
 }
 
- void ARTSPlayerController::ServerAddOrder_Implementation(APawn* OrderedPawn, const FRTSOrderData& Order)
+void ARTSPlayerController::ServerAddOrder_Implementation(APawn* OrderedPawn, const FRTSOrderData& Order)
 {
 	if (!Order.OrderClass)
 	{
@@ -435,7 +451,7 @@ bool ARTSPlayerController::ServerIssueOrder_Validate(APawn* OrderedPawn, const F
 	NotifyOnIssuedOrder(OrderedPawn, Order);
 }
 
- bool ARTSPlayerController::ServerAddOrder_Validate(APawn* OrderedPawn, const FRTSOrderData& Order)
+bool ARTSPlayerController::ServerAddOrder_Validate(APawn* OrderedPawn, const FRTSOrderData& Order)
 {
 	// Verify owner to prevent cheating.
 	return OrderedPawn->GetOwner() == this;

@@ -14,6 +14,7 @@
 #include "RTSPlayerController.generated.h"
 
 
+class UNiagaraSystem;
 class USkeletalMesh;
 
 class ARTSBuildingCursor;
@@ -258,7 +259,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Surrender();
 
-	virtual void GameHasEnded(class AActor* EndGameFocus = NULL, bool bIsWinner = false) override;
+	virtual void GameHasEnded(AActor* EndGameFocus = nullptr, bool bIsWinner = false) override;
 
 	/** Notifies this client that the game has ended. */
 	UFUNCTION(Reliable, Client)
@@ -420,6 +421,9 @@ protected:
 
 	UPROPERTY()
 	URTSComponentRegistry* ComponentRegistry;
+
+	UPROPERTY(EditDefaultsOnly)
+	TMap<TSubclassOf<URTSOrder>, UNiagaraSystem*> OrderParticles;
 
 private:
 	/** Movement speed of the camera when moved with keys or mouse, in cm/sec. */

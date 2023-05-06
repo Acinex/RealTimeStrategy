@@ -6,13 +6,6 @@ namespace UnrealBuildTool.Rules
 			: base(Target)
 		{
 			PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-			bEnforceIWYU = true;
-
-			PrivateIncludePaths.AddRange(
-				new[]
-				{
-					"RealTimeStrategy/Private"
-				});
 
 			PublicDependencyModuleNames.AddRange(
 				new[]
@@ -34,6 +27,8 @@ namespace UnrealBuildTool.Rules
 					"GameplayAbilities",
 					"DeveloperSettings"
 				});
+			
+			PrivateDependencyModuleNames.AddRange(new string[] {"Niagara"});
 
 			// Setup Gameplay Debugger.
 			if (Target.bBuildDeveloperTools || (Target.Configuration != UnrealTargetConfiguration.Shipping && Target.Configuration != UnrealTargetConfiguration.Test))

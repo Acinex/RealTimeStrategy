@@ -24,4 +24,12 @@ public:
 	 */
 	UPROPERTY(Config, EditAnywhere, Category="Units")
 	FName UnitColorMaterialParameterName;
+	
+	/**
+	 * Name to be used to pass the unit-color into the materials for the particles spawned for each order the player issues.
+	 *
+	 * If this is set to None, the particles won't get a parameter at all
+	 */
+	UPROPERTY(Config, EditAnywhere, Category="Effects")
+	FName OrderParticleMaterialParameterName;
 };
