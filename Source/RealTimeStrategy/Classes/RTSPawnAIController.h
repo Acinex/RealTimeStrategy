@@ -30,6 +30,7 @@ class REALTIMESTRATEGY_API ARTSPawnAIController : public AAIController
 	GENERATED_BODY()
 
 public:
+	explicit ARTSPawnAIController(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	/** Makes the pawn look for a feasible target in its acquisition radius. */
 	UFUNCTION(BlueprintCallable)
 	void FindTargetInAcquisitionRadius();

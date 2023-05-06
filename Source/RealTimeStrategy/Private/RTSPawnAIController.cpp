@@ -14,6 +14,7 @@
 #include "Libraries/RTSGameplayLibrary.h"
 #include "Libraries/RTSGameplayTagLibrary.h"
 #include "Libraries/RTSOrderLibrary.h"
+#include "Navigation/CrowdFollowingComponent.h"
 #include "Orders/RTSAttackOrder.h"
 #include "Orders/RTSBeginConstructionOrder.h"
 #include "Orders/RTSContinueConstructionOrder.h"
@@ -22,6 +23,11 @@
 #include "Orders/RTSReturnResourcesOrder.h"
 #include "Orders/RTSStopOrder.h"
 
+
+ARTSPawnAIController::ARTSPawnAIController(const FObjectInitializer& ObjectInitializer):
+	Super(ObjectInitializer.SetDefaultSubobjectClass<UCrowdFollowingComponent>(TEXT("PathFollowingComponent")))
+{
+}
 
 void ARTSPawnAIController::OnPossess(APawn* InPawn)
 {
