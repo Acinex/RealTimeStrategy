@@ -17,7 +17,5 @@ void URTSGEHealthRegen::Update(const URTSCombatComponent* CombatComponent, float
 	ModifierInfo.Attribute = AttributeSet->GetHealthAttribute();
 	ModifierInfo.ModifierMagnitude = FGameplayEffectModifierMagnitude(Change);
 
-	UE_LOG(LogTemp, Warning, TEXT("Change is %f"), Change)
-
 	Modifiers.Add(ModifierInfo);
 }
