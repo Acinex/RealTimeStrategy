@@ -12,6 +12,7 @@
 class URTSOwnerComponent;
 class AController;
 
+class URTSGameInstanceSubSystem;
 class ARTSPlayerAIController;
 class ARTSPlayerController;
 class ARTSPlayerStart;
@@ -48,8 +49,8 @@ public:
 	UFUNCTION(BlueprintPure)
 	FLinearColor GetPlayerColor(uint8 Index);
 
-	UFUNCTION(BlueprintCallable)
-	void SetPlayerColors(TArray<FLinearColor> Colors);
+	UFUNCTION(BlueprintPure)
+	URTSRace* GetPlayerRace(uint8 Index);
 
 	/** Spawns an actor of the specified type and transfers ownership to the specified player. */
 	virtual AActor* SpawnActorForPlayer(TSubclassOf<AActor> ActorClass, AController* ActorOwner, const FTransform& SpawnTransform);
@@ -79,16 +80,22 @@ public:
 	void ReceiveOnGameOver(ARTSTeamInfo* Winner);
 
 	UFUNCTION(BlueprintCallable, Category = "RTS")
-	FRaceUnitData GetRaceUnitData(URTSRace* Race);
+	FRaceUnitData GetRaceUnitData(URTSRace* Race, uint8 PlayerIndex);
+
 
 protected:
 	UPROPERTY(EditAnywhere, Category="RTS|Players")
 	TArray<FLinearColor> PlayerColors;
+	UPROPERTY(EditAnywhere, Category="RTS|Players")
+	TArray<URTSRace*> PlayerRaces;
 
 	UPROPERTY(EditDefaultsOnly, Category="RTS|Races")
-	TMap<URTSRace*, FRaceUnitData> RaceUnitData;
+	TArray<FRaceUnitData> RaceUnitData;
 
 private:
+	UPROPERTY()
+	URTSGameInstanceSubSystem* GameInstanceSubSystem;
+
 	/** Class of TeamInfo to spawn. */
 	UPROPERTY(EditDefaultsOnly, Category = "RTS|Team")
 	TSubclassOf<ARTSTeamInfo> TeamClass;

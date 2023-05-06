@@ -1,6 +1,7 @@
 #include "RTSGameMode.h"
 
 #include "EngineUtils.h"
+#include "RTSGameInstanceSubSystem.h"
 #include "Engine/World.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/GameModeBase.h"
@@ -64,6 +65,8 @@ void ARTSGameMode::BeginPlay()
 void ARTSGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
 {
 	AGameModeBase::InitGame(MapName, Options, ErrorMessage);
+
+	GameInstanceSubSystem = GetGameInstance()->GetSubsystem<URTSGameInstanceSubSystem>();
 
 	// Set up teams.
 	if (TeamClass == nullptr)
@@ -198,9 +201,10 @@ void ARTSGameMode::RestartPlayerAtPlayerStart(AController* NewPlayer, AActor* St
 	const uint8 PlayerIndex = PlayerState->GetPlayerIndex();
 	PlayerState->SetColor(GetPlayerColor(PlayerIndex));
 
-	if (URTSRace* Race = PlayerState->GetRace(); IsValid(Race))
+	if (URTSRace* Race = GetPlayerRace(PlayerIndex); IsValid(Race))
 	{
-		const FRaceUnitData UnitData = GetRaceUnitData(Race);
+		const FRaceUnitData UnitData = GetRaceUnitData(Race, PlayerIndex);
+		PlayerState->SetRace(Race);
 
 		// Build spawn info.
 		for (int32 Index = 0; Index < UnitData.InitialActors.Num(); ++Index)
@@ -270,6 +274,12 @@ ARTSPlayerAIController* ARTSGameMode::StartAIPlayer()
 
 FLinearColor ARTSGameMode::GetPlayerColor(const uint8 Index)
 {
+	FLinearColor Color = FLinearColor::Black;
+	if (GameInstanceSubSystem->GetPlayerColor(Index, Color))
+	{
+		return Color;
+	}
+
 	if (!PlayerColors.IsValidIndex(Index))
 	{
 		return FLinearColor::Black;
@@ -278,19 +288,20 @@ FLinearColor ARTSGameMode::GetPlayerColor(const uint8 Index)
 	return PlayerColors[Index];
 }
 
-void ARTSGameMode::SetPlayerColors(const TArray<FLinearColor> Colors)
+URTSRace* ARTSGameMode::GetPlayerRace(uint8 Index)
 {
-	PlayerColors = Colors;
-
-	for (const ARTSTeamInfo* Team : Teams)
+	URTSRace* Race = nullptr;
+	if (GameInstanceSubSystem->GetPlayerRace(Index, Race))
 	{
-		TArray<AController*> Controllers = Team->GetTeamMembers();
-		for (const AController* Controller : Controllers)
-		{
-			ARTSPlayerState* PlayerState = Controller->GetPlayerState<ARTSPlayerState>();
-			PlayerState->SetColor(GetPlayerColor(PlayerState->GetPlayerIndex()));
-		}
+		return Race;
 	}
+
+	if (!PlayerRaces.IsValidIndex(Index))
+	{
+		return nullptr;
+	}
+
+	return PlayerRaces[Index];
 }
 
 AActor* ARTSGameMode::SpawnActorForPlayer(TSubclassOf<AActor> ActorClass, AController* ActorOwner, const FTransform& SpawnTransform)
@@ -369,8 +380,7 @@ void ARTSGameMode::NotifyOnActorKilled(AActor* Actor, AController* ActorOwner)
 
 	URTSRace* Race = PlayerState->GetRace();
 
-
-	const FRaceUnitData Data = GetRaceUnitData(Race);
+	const FRaceUnitData Data = GetRaceUnitData(Race, PlayerState->GetPlayerIndex());
 
 	if (!IsValid(Race) || Data.DefeatConditionActorClasses.Num() <= 0)
 	{
@@ -439,14 +449,14 @@ void ARTSGameMode::NotifyGameOver(ARTSTeamInfo* InWinnerTeam)
 	ReceiveOnGameOver(InWinnerTeam);
 }
 
-FRaceUnitData ARTSGameMode::GetRaceUnitData(URTSRace* Race)
+FRaceUnitData ARTSGameMode::GetRaceUnitData(URTSRace* Race, uint8 PlayerIndex)
 {
-	if (FRaceUnitData* UnitData = RaceUnitData.Find(Race))
+	if (!RaceUnitData.IsValidIndex(PlayerIndex))
 	{
-		return *UnitData;
+		return Race->DefaultRaceUnitData;
 	}
 
-	return Race->DefaultRaceUnitData;
+	return RaceUnitData[PlayerIndex];
 }
 
 uint8 ARTSGameMode::GetAvailablePlayerIndex() const

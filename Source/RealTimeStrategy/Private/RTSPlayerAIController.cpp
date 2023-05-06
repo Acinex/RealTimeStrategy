@@ -64,7 +64,7 @@ TSubclassOf<AActor> ARTSPlayerAIController::GetNextPawnToProduce() const
 
 	ARTSGameMode* GameMode = Cast<ARTSGameMode>(UGameplayStatics::GetGameMode(this));
 
-	const FRaceUnitData UnitData = GameMode->GetRaceUnitData(RTSPlayerState->GetRace());
+	const FRaceUnitData UnitData = GameMode->GetRaceUnitData(RTSPlayerState->GetRace(), RTSPlayerState->GetPlayerIndex());
 
 	// Check build order.
 	TMap<TSubclassOf<AActor>, int32> BuildOrderPawns;
@@ -88,14 +88,14 @@ AActor* ARTSPlayerAIController::GetPrimaryResourceDrain() const
 
 	for (TWeakObjectPtr<URTSResourceDrainComponent> ResourceDrainComponent : ResourceDrainComponents)
 	{
-		if(!ResourceDrainComponent.IsValid())
+		if (!ResourceDrainComponent.IsValid())
 		{
 			continue;
 		}
 
 		AActor* Actor = ResourceDrainComponent->GetOwner();
 
-		if(Actor->GetOwner() == this)
+		if (Actor->GetOwner() == this)
 		{
 			return Actor;
 		}
@@ -118,14 +118,14 @@ AActor* ARTSPlayerAIController::GetPrimaryResourceSource() const
 	AActor* ClosestResourceSource = nullptr;
 	float ClosestResourceSourceDistance = 0.0f;
 	TSet<TWeakObjectPtr<URTSResourceSourceComponent>> ResourceSourceComponents = ComponentRegistry->GetComponents<URTSResourceSourceComponent>();
-	
+
 	for (TWeakObjectPtr<URTSResourceSourceComponent> ResourceSourceComponent : ResourceSourceComponents)
 	{
-		if(!ResourceSourceComponent.IsValid())
+		if (!ResourceSourceComponent.IsValid())
 		{
 			continue;
 		}
-		
+
 		// Check resource type.
 		if (ResourceSourceComponent->GetResourceType() != PrimaryResourceType)
 		{
