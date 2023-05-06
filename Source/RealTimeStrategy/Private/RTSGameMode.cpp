@@ -220,6 +220,22 @@ void ARTSGameMode::RestartPlayerAtPlayerStart(AController* NewPlayer, AActor* St
 	}
 }
 
+AController* ARTSGameMode::GetController(const int32 Index)
+{
+	for (const ARTSTeamInfo* Team : Teams)
+	{
+		for (AController* TeamMember : Team->GetTeamMembers())
+		{
+			if (TeamMember->GetPlayerState<ARTSPlayerState>()->GetPlayerIndex() == Index)
+			{
+				return TeamMember;
+			}
+		}
+	}
+
+	return nullptr;
+}
+
 ARTSPlayerAIController* ARTSGameMode::StartAIPlayer()
 {
 	FActorSpawnParameters SpawnInfo;
@@ -370,6 +386,48 @@ void ARTSGameMode::NotifyOnActorKilled(AActor* Actor, AController* ActorOwner)
 void ARTSGameMode::NotifyOnPlayerDefeated(AController* Player)
 {
 	ReceiveOnPlayerDefeated(Player);
+
+	DefeatedPlayers.Add(Player->GetPlayerState<ARTSPlayerState>()->GetPlayerIndex());
+
+	TArray<ARTSTeamInfo*> LeftOverTeams = Teams;
+
+	for (auto It = LeftOverTeams.CreateIterator(); It; ++It)
+	{
+		bool Defeated = true;
+		for (const AController* Controller : (*It)->GetTeamMembers())
+		{
+			if (!DefeatedPlayers.Contains(Controller->GetPlayerState<ARTSPlayerState>()->GetPlayerIndex()))
+			{
+				Defeated = false;
+				break;
+			}
+		}
+
+		if (Defeated)
+		{
+			It.RemoveCurrent();
+		}
+	}
+
+	if (LeftOverTeams.Num() == 1)
+	{
+		NotifyGameOver(LeftOverTeams[0]);
+	}
+}
+
+void ARTSGameMode::NotifyGameOver(ARTSTeamInfo* InWinnerTeam)
+{
+	WinnerTeam = InWinnerTeam;
+
+	for (const ARTSTeamInfo* Team : Teams)
+	{
+		for (AController* TeamMember : Team->GetTeamMembers())
+		{
+			TeamMember->GameHasEnded(nullptr, WinnerTeam == Team);
+		}
+	}
+
+	ReceiveOnGameOver(InWinnerTeam);
 }
 
 FRaceUnitData ARTSGameMode::GetRaceUnitData(URTSRace* Race)

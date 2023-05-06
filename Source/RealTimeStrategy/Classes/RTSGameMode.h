@@ -37,6 +37,12 @@ public:
 	virtual void RestartPlayer(AController* NewPlayer) override;
 	virtual void RestartPlayerAtPlayerStart(AController* NewPlayer, AActor* StartSpot) override;
 
+	UFUNCTION(BlueprintPure)
+	ARTSTeamInfo* GetWinnerTeam() const { return WinnerTeam; }
+	
+	UFUNCTION(BlueprintPure)
+	AController* GetController(int32 Index);
+
 	virtual ARTSPlayerAIController* StartAIPlayer();
 
 	UFUNCTION(BlueprintPure)
@@ -53,6 +59,7 @@ public:
 	void TransferOwnership(AActor* Actor, AController* NewOwner);
 
 	/** Gets the teams of the current match. */
+	UFUNCTION(BlueprintPure)
 	TArray<ARTSTeamInfo*> GetTeams() const;
 
 	/** Event when an actor has been killed. */
@@ -61,9 +68,15 @@ public:
 	/** Event when a player has been defeated. */
 	virtual void NotifyOnPlayerDefeated(AController* Player);
 
+	virtual void NotifyGameOver(ARTSTeamInfo* InWinnerTeam);
+
 	/** Event when a player has been defeated. */
 	UFUNCTION(BlueprintImplementableEvent, Category = "RTS", meta = (DisplayName = "OnPlayerDefeated"))
 	void ReceiveOnPlayerDefeated(AController* Player);
+
+	/** Event when a team has won. */
+	UFUNCTION(BlueprintImplementableEvent, Category = "RTS", meta = (DisplayName = "OnGameOver"))
+	void ReceiveOnGameOver(ARTSTeamInfo* Winner);
 
 	UFUNCTION(BlueprintCallable, Category = "RTS")
 	FRaceUnitData GetRaceUnitData(URTSRace* Race);
@@ -96,8 +109,13 @@ private:
 	UPROPERTY()
 	TArray<ARTSTeamInfo*> Teams;
 
+	UPROPERTY()
+	ARTSTeamInfo* WinnerTeam;
+
+	TArray<int32> DefeatedPlayers;
+
 	/** Gets the first player index that isn't assigned to any player. */
-	uint8 GetAvailablePlayerIndex();
+	uint8 GetAvailablePlayerIndex() const;
 
 	UFUNCTION()
 	void OnActorRegistered(UActorComponent* Component);
