@@ -134,13 +134,6 @@ void URTSCombatComponent::KillActor(AActor* DamageCauser) const
 		UGameplayStatics::PlaySoundAtLocation(this, DeathSound, GetOwner()->GetActorLocation(), GetOwner()->GetActorRotation());
 	}
 
-	// Notify game mode.
-
-	if (ARTSGameMode* GameMode = Cast<ARTSGameMode>(UGameplayStatics::GetGameMode(GetWorld())); GameMode != nullptr)
-	{
-		GameMode->NotifyOnActorKilled(Owner, OwningPlayer);
-	}
-
 	// Stop or destroy actor.
 	switch (ActorDeathType)
 	{
@@ -152,6 +145,13 @@ void URTSCombatComponent::KillActor(AActor* DamageCauser) const
 		Owner->Destroy();
 		break;
 	default: ;
+	}
+
+	// Notify game mode.
+
+	if (ARTSGameMode* GameMode = Cast<ARTSGameMode>(UGameplayStatics::GetGameMode(GetWorld())); GameMode != nullptr)
+	{
+		GameMode->NotifyOnActorKilled(Owner, OwningPlayer);
 	}
 }
 
