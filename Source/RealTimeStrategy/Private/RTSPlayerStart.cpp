@@ -10,6 +10,11 @@ AController* ARTSPlayerStart::GetPlayer() const
 	return Player;
 }
 
+uint8 ARTSPlayerStart::GetPlayerIndex() const
+{
+	return PlayerIndex;
+}
+
 void ARTSPlayerStart::SetPlayer(AController* InPlayer)
 {
 	Player = InPlayer;

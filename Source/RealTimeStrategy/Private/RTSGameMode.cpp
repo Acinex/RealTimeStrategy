@@ -98,9 +98,16 @@ ARTSPlayerStart* ARTSGameMode::FindRTSPlayerStart(AController* Player)
 	TArray<ARTSPlayerStart*> UnOccupiedStartPoints;
 	TArray<ARTSPlayerStart*> OccupiedStartPoints;
 
+	const uint8 PlayerIndex = Player->GetPlayerState<ARTSPlayerState>()->GetPlayerIndex();
+
 	for (TActorIterator<ARTSPlayerStart> It(GetWorld()); It; ++It)
 	{
 		ARTSPlayerStart* PlayerStart = *It;
+
+		if (PlayerStart->GetPlayerIndex() == PlayerIndex)
+		{
+			return PlayerStart;
+		}
 
 		if (PlayerStart->GetPlayer() == nullptr)
 		{
@@ -116,7 +123,7 @@ ARTSPlayerStart* ARTSGameMode::FindRTSPlayerStart(AController* Player)
 	{
 		return UnOccupiedStartPoints[FMath::RandRange(0, UnOccupiedStartPoints.Num() - 1)];
 	}
-	else if (OccupiedStartPoints.Num() > 0)
+	if (OccupiedStartPoints.Num() > 0)
 	{
 		return OccupiedStartPoints[FMath::RandRange(0, OccupiedStartPoints.Num() - 1)];
 	}
@@ -130,6 +137,9 @@ void ARTSGameMode::RestartPlayer(AController* NewPlayer)
 	{
 		return;
 	}
+
+	const uint8 PlayerIndex = GetAvailablePlayerIndex();
+	NewPlayer->GetPlayerState<ARTSPlayerState>()->SetPlayerIndex(PlayerIndex);
 
 	ARTSPlayerStart* StartSpot = FindRTSPlayerStart(NewPlayer);
 	RestartPlayerAtPlayerStart(NewPlayer, StartSpot);
@@ -151,7 +161,7 @@ void ARTSGameMode::RestartPlayerAtPlayerStart(AController* NewPlayer, AActor* St
 		return;
 	}
 
-	ARTSGameState* RTSGameState = GetGameState<ARTSGameState>();
+	const ARTSGameState* RTSGameState = GetGameState<ARTSGameState>();
 
 	if (!IsValid(RTSGameState))
 	{
@@ -185,8 +195,7 @@ void ARTSGameMode::RestartPlayerAtPlayerStart(AController* NewPlayer, AActor* St
 
 	ARTSPlayerState* PlayerState = Cast<ARTSPlayerState>(NewPlayer->PlayerState);
 
-	const uint8 PlayerIndex = GetAvailablePlayerIndex();
-	PlayerState->SetPlayerIndex(PlayerIndex);
+	const uint8 PlayerIndex = PlayerState->GetPlayerIndex();
 	PlayerState->SetColor(GetPlayerColor(PlayerIndex));
 
 	if (URTSRace* Race = PlayerState->GetRace(); IsValid(Race))
@@ -290,7 +299,7 @@ AActor* ARTSGameMode::SpawnActorForPlayer(TSubclassOf<AActor> ActorClass, AContr
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-	AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(ActorClass->GetDefaultObject()->GetClass(), SpawnTransform, SpawnParams);
+	AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(ActorClass, SpawnTransform, SpawnParams);
 
 	// Set owning player.
 	if (SpawnedActor && ActorOwner)
@@ -440,7 +449,7 @@ FRaceUnitData ARTSGameMode::GetRaceUnitData(URTSRace* Race)
 	return Race->DefaultRaceUnitData;
 }
 
-uint8 ARTSGameMode::GetAvailablePlayerIndex()
+uint8 ARTSGameMode::GetAvailablePlayerIndex() const
 {
 	const UWorld* World = GetWorld();
 
@@ -450,7 +459,7 @@ uint8 ARTSGameMode::GetAvailablePlayerIndex()
 	}
 
 	uint8 PlayerIndex = 0;
-	bool bPlayerIndexInUse = false;
+	bool bPlayerIndexInUse;
 
 	do
 	{

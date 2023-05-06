@@ -24,6 +24,9 @@ public:
 	UFUNCTION(BlueprintPure)
 	AController* GetPlayer() const;
 
+	UFUNCTION(BlueprintPure)
+	uint8 GetPlayerIndex() const;
+
 	/** Sets the player who's been spawned at this start. */
 	void SetPlayer(AController* InPlayer);
 
@@ -40,6 +43,10 @@ private:
 	/** Team to add the spawned player to. */
 	UPROPERTY(EditInstanceOnly, Category = "RTS|Team")
 	uint8 TeamIndex;
+
+	/** Player for which this is reserved. */
+	UPROPERTY(EditInstanceOnly, Category = "RTS")
+	uint8 PlayerIndex = -1;
 
 	/** Player who's been spawned at this start. */
 	UPROPERTY()
