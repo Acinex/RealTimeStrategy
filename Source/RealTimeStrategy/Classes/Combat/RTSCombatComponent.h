@@ -51,6 +51,9 @@ public:
 	UFUNCTION(BlueprintPure)
 	TArray<FRTSAttackData> GetAttacks() const { return Attacks; }
 
+	UFUNCTION(BlueprintPure)
+	AActor* GetLastTarget() const;
+
 	virtual void BeginPlay() override;
 
 	virtual void AddGameplayTags(FGameplayTagContainer& InOutTagContainer) override;
@@ -131,4 +134,6 @@ protected:
 	TArray<FGameplayAbilitySpecHandle> AbilitySpecs;
 
 	float LastTimeDamageTaken;
+
+	TWeakObjectPtr<AActor> LastTarget;
 };

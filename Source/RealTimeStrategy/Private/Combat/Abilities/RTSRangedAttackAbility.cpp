@@ -6,7 +6,6 @@
 #include "RTSLog.h"
 #include "Combat/RTSAbilityProjectile.h"
 #include "Combat/RTSCombatComponent.h"
-#include "Combat/RTSProjectile.h"
 #include "Libraries/RTSGameplayTagLibrary.h"
 
 URTSRangedAttackAbility::URTSRangedAttackAbility(const FObjectInitializer& ObjectInitializer): Super(ObjectInitializer)
@@ -19,12 +18,11 @@ void URTSRangedAttackAbility::ActivateAbility(const FGameplayAbilitySpecHandle H
 {
 	if (!ProjectileClass.Get())
 	{
+		UE_LOG(LogRTS, Error, TEXT("URTSRangedAttackAbility: No Projectile Class"));
 		return;
 	}
 
 	CommitAbility(Handle, ActorInfo, ActivationInfo, nullptr);
-
-	UE_LOG(LogRTS, Log, TEXT("Actor %s attacks %s."), *ActorInfo->OwnerActor->GetName(), *TriggerEventData->Target->GetName());
 
 	// Fire projectile.
 	// Build spawn transform.
@@ -38,17 +36,23 @@ void URTSRangedAttackAbility::ActivateAbility(const FGameplayAbilitySpecHandle H
 	SpawnInfo.Owner = Cast<APawn>(ActorInfo->OwnerActor);
 	SpawnInfo.ObjectFlags |= RF_Transient;
 
+	const AActor* Target = Cast<URTSCombatComponent>(ActorInfo->AbilitySystemComponent)->GetLastTarget();
+
 	// Spawn projectile.
 
 	if (ARTSAbilityProjectile* SpawnedProjectile = GetWorld()->SpawnActor<ARTSAbilityProjectile>(ProjectileClass, SpawnTransform, SpawnInfo))
 	{
-		UE_LOG(LogRTS, Log, TEXT("%s fired projectile %s at target %s."), *ActorInfo->OwnerActor->GetName(), *SpawnedProjectile->GetName(), *TriggerEventData->Target->GetName());
+		UE_LOG(LogRTS, Log, TEXT("%s fired projectile %s at target %s."), *ActorInfo->OwnerActor->GetName(), *SpawnedProjectile->GetName(), *Target->GetName());
 
 		// Aim at target.
-		SpawnedProjectile->SetTarget(TriggerEventData->Target);
+		SpawnedProjectile->SetTarget(Target);
 
 		const URTSCombatComponent* CombatComponent = Cast<URTSCombatComponent>(ActorInfo->AbilitySystemComponent.Get());
-		CombatComponent->OnAttackUsed.Broadcast(ActorInfo->OwnerActor.Get(), TriggerEventData->Target, SpawnedProjectile);
+		CombatComponent->OnAttackUsed.Broadcast(ActorInfo->OwnerActor.Get(), Target, SpawnedProjectile);
+	}
+	else
+	{
+		UE_LOG(LogRTS, Warning, TEXT("No Projectile was spawned"));
 	}
 
 	EndAbility(Handle, ActorInfo, ActivationInfo, true, false);

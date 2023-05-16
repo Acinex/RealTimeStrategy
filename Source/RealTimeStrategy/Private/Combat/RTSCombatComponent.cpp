@@ -24,7 +24,9 @@ void URTSCombatComponent::UseAttack(int32 AttackIndex, AActor* Target)
 
 	const AActor* Owner = GetOwner();
 
-	UE_LOG(LogRTS, Log, TEXT("Actor %s attacks %s."), *Owner->GetName(), *Target->GetName());
+	UE_LOG(LogRTS, Log, TEXT("URTSCombatComponent: Actor %s attacks %s."), *Owner->GetName(), *Target->GetName());
+
+	LastTarget = Target;
 
 	if (!TryActivateAbility(AbilitySpecs[AttackIndex]))
 	{
@@ -40,6 +42,11 @@ float URTSCombatComponent::GetAttackRange(AActor* Target) const
 		return 0;
 	}
 	return Attacks[0].Range;
+}
+
+AActor* URTSCombatComponent::GetLastTarget() const
+{
+	return LastTarget.Get();
 }
 
 void URTSCombatComponent::BeginPlay()
@@ -127,7 +134,11 @@ void URTSCombatComponent::KillActor(AActor* DamageCauser) const
 	// Notify listeners.
 	OnKilled.Broadcast(Owner, OwningPlayer, DamageCauser);
 
-	OwningPlayer->GetPlayerState<ARTSPlayerState>()->Remove(Owner);
+	ARTSPlayerState* PlayerState = OwningPlayer->GetPlayerState<ARTSPlayerState>();
+	if (PlayerState != nullptr)
+	{
+		PlayerState->Remove(Owner);
+	}
 
 	if (IsValid(DeathSound))
 	{
@@ -160,7 +171,7 @@ void URTSCombatComponent::NotifyOnHealthChanged(AActor* Actor, float OldHealth, 
 	// Notify listeners.
 	OnHealthChanged.Broadcast(Actor, OldHealth, NewHealth, DamageCauser);
 
-	if(NewHealth < OldHealth)
+	if (NewHealth < OldHealth)
 	{
 		LastTimeDamageTaken = GetWorld()->GetRealTimeSeconds();
 	}

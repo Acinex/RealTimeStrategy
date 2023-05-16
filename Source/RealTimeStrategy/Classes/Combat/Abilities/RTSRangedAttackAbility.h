@@ -20,7 +20,7 @@ public:
 	explicit URTSRangedAttackAbility(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
-
+	
 protected:
 	UPROPERTY(EditAnywhere, Category="RTS")
 	TSubclassOf<ARTSAbilityProjectile> ProjectileClass;
