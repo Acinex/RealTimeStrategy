@@ -3,7 +3,9 @@
 
 #include "Combat/Abilities/RTSRangedAttackAbility.h"
 
+#include "AIController.h"
 #include "RTSLog.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Combat/RTSAbilityProjectile.h"
 #include "Combat/RTSCombatComponent.h"
 #include "Libraries/RTSGameplayTagLibrary.h"
@@ -36,7 +38,18 @@ void URTSRangedAttackAbility::ActivateAbility(const FGameplayAbilitySpecHandle H
 	SpawnInfo.Owner = Cast<APawn>(ActorInfo->OwnerActor);
 	SpawnInfo.ObjectFlags |= RF_Transient;
 
-	const AActor* Target = Cast<URTSCombatComponent>(ActorInfo->AbilitySystemComponent)->GetLastTarget();
+	AAIController* Controller = Cast<AAIController>(Cast<APawn>(ActorInfo->OwnerActor)->GetController());
+
+	if (!IsValid(Controller))
+	{
+		return;
+	}
+
+	const AActor* Target = Cast<AActor>(Controller->GetBlackboardComponent()->GetValueAsObject("TargetActor"));
+	if (!IsValid(Target))
+	{
+		return;
+	}
 
 	// Spawn projectile.
 

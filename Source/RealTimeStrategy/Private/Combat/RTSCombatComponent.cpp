@@ -26,8 +26,6 @@ void URTSCombatComponent::UseAttack(int32 AttackIndex, AActor* Target)
 
 	UE_LOG(LogRTS, Log, TEXT("URTSCombatComponent: Actor %s attacks %s."), *Owner->GetName(), *Target->GetName());
 
-	LastTarget = Target;
-
 	if (!TryActivateAbility(AbilitySpecs[AttackIndex]))
 	{
 		UE_LOG(LogRTS, Warning, TEXT("Could not activate %s"), *Attacks[AttackIndex].AbilityClass->GetName())
@@ -42,11 +40,6 @@ float URTSCombatComponent::GetAttackRange(AActor* Target) const
 		return 0;
 	}
 	return Attacks[0].Range;
-}
-
-AActor* URTSCombatComponent::GetLastTarget() const
-{
-	return LastTarget.Get();
 }
 
 void URTSCombatComponent::BeginPlay()
