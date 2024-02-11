@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Sound/SoundCue.h"
+#include "Engine/DamageEvents.h"
 
 #include "RTSLog.h"
 #include "RTSOwnerComponent.h"

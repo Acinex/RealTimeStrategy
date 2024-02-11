@@ -1,6 +1,7 @@
 #include "Combat/RTSAttackComponent.h"
 
 #include "Engine/World.h"
+#include "Engine/DamageEvents.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/Pawn.h"
 
@@ -119,8 +120,9 @@ void URTSAttackComponent::UseAttack(int32 AttackIndex, AActor* Target)
 	}
 	else
 	{
+		const FDamageEvent DamageEvent(Attack.DamageType);
 		// Deal damage immediately.
-		Target->TakeDamage(Damage, FDamageEvent(Attack.DamageType), OwnerController, Owner);
+		Target->TakeDamage(Damage, DamageEvent, OwnerController, Owner);
 	}
 
 	// Start cooldown timer.

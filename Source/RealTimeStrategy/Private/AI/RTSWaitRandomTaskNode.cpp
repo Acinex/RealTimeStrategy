@@ -10,7 +10,7 @@ EBTNodeResult::Type URTSWaitRandomTask::ExecuteTask(UBehaviorTreeComponent& Owne
 	FTimerHandle Handle;
 
 	FTimerDelegate TimerCallback;
-	TimerCallback.BindLambda([=, &OwnerComp]
+	TimerCallback.BindLambda([this, &OwnerComp]
 	{
 		FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 	});

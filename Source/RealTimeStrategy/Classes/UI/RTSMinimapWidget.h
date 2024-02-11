@@ -3,7 +3,6 @@
 #include "CoreMinimal.h"
 
 #include "Blueprint/UserWidget.h"
-#include "Launch/Resources/Version.h"
 
 #include "RTSMinimapWidget.generated.h"
 

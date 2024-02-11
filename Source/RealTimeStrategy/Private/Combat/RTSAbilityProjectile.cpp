@@ -3,10 +3,10 @@
 #include "Combat/RTSAbilityProjectile.h"
 
 #include "AbilitySystemComponent.h"
+#include "AbilitySystemGlobals.h"
 #include "Combat/RTSAttributeSet.h"
 #include "RTSLog.h"
 #include "GameFramework/ProjectileMovementComponent.h"
-#include "GameplayAbilities/Public/AbilitySystemGlobals.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
 #include "Sound/SoundBase.h"

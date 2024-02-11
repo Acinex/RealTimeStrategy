@@ -11,7 +11,6 @@ UGEMeleeDamage::UGEMeleeDamage(const FObjectInitializer& ObjectInitializer): Sup
 		UGECMeleeDamage::StaticClass(),
 		FGameplayTagContainer(),
 		{},
-		{},
 		{}
 	};
 
